@@ -1,4 +1,4 @@
-# try.py
+# model package initialization
 
 from model.get_keyword import get_keyword
 from model.get_classification import get_classification
