@@ -1,0 +1,48 @@
+{# ================== 景点卡片宏 ================== #}
+{% macro attraction_card(card) -%}
+## {{ card.poiName }}
+{% if card.zoneName %}### 区域：{{ card.zoneName }}{% endif %}
+{% if card.sightLevelStr %}🏅 等级：{{ card.sightLevelStr }}{% endif %}
+⭐ 评分：{{ card.commentScore }}（基于{{ card.commentCount }}条评价）
+
+{# --------------------- 标签信息 --------------------- #}
+{% if card.tagNameList or card.otherTagList %}
+### 标签分类：
+🏷️ 主标签：{{ card.tagNameList | join('、') }}
+{% if card.otherTagList %}
+🏷️ 服务标签：{% for tag in card.otherTagList %}{{ tag.name }}{% if not loop.last %} | {% endif %}{% endfor %}
+{% endif %}
+{% endif %}
+
+{# --------------------- 价格信息 --------------------- #}
+### 门票价格：
+{% if card.isFree %}
+🆓 免费开放（{{ card.priceTypeDesc }}）
+{% else %}
+{% if card.priceType|default('') == '' or card.price|default('') == '' %}
+未知
+{% else %}
+{% if card.price == card.marketPrice or card.preferentialPrice == 0 %}
+💵 ¥{{ card.marketPrice }}
+{% else %}
+💵 ~~¥{{ card.marketPrice }}~~ ➔ ¥{{ card.price }}{% if card.preferentialDesc %}（{{ card.preferentialDesc }}）{% endif %}
+{% endif %}
+{% endif %}
+{% endif %}
+
+{# --------------------- 特色亮点 --------------------- #}
+{% if card.shortFeatures %}
+### 特色亮点：
+{% for feat in card.shortFeatures %}
+▶ {{ feat }}{% if not loop.last %}{% endif %}{% endfor %}
+{% endif %}
+
+### 排行榜：{{ card.sightCategoryInfo | default("未上榜") }}
+
+{%- endmacro %}
+
+{# ===================== 主循环 ===================== #}
+{% for item in attractionList %}
+{{ attraction_card(item.card) }}
+{% if not loop.last %}══════════════════════════════{% endif %}
+{% endfor %}

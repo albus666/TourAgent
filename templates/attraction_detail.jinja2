@@ -1,0 +1,31 @@
+{# ================== 景点详情宏 ================== #}
+{% macro attraction_detail(attraction) -%}
+## {{ attraction.name }}
+
+### 基本信息
+⭐ 评分：{{ attraction.score }}（{{ attraction.review_count }}条评价）
+👍 好评：{{ attraction.positive_count }}条
+👎 差评：{{ attraction.negative_count }}条
+🔗 详情链接：{{ attraction.url }}
+
+### 游客评价
+{% for comment in attraction.comments %}
+#### 评价 {{ loop.index }}
+{{ comment }}
+{% if not loop.last %}
+---
+{% endif %}
+{% endfor %}
+
+### 评价词云
+![评价词云]({{ attraction.wordcloud_url }})
+
+{%- endmacro %}
+
+{# ===================== 主循环 ===================== #}
+{% for attraction in attractionList %}
+{{ attraction_detail(attraction) }}
+{% if not loop.last %}
+════════════════════════════════════════════════════════════════════════════════
+{% endif %}
+{% endfor %} 
