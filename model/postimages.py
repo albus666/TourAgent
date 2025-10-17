@@ -108,9 +108,9 @@ def upload_file(filename, filedata, filetype, optsize=0, expire=0, session=None)
     upload_session = f"{timestamp}.{str(random_number)}"
 
     match = re.search(r'upload_referer":"(.*?)"}}', response.content.decode())
-    upload_referer = match.group(1)
     if not match:
         raise RuntimeError("无法找到 upload_referer 。")
+    upload_referer = match.group(1)
 
     # 生成 WebKitFormBoundary
     boundary_chars = string.ascii_letters + string.digits
