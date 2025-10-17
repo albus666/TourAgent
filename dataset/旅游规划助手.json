@@ -16,7 +16,7 @@
         "label": "apps.templates.basicChat.Opening statement",
         "showTargetInApp": false,
         "showTargetInPlugin": false,
-        "value": "",
+        "value": "你好呀！👋\n\n我是你的旅游小助手，专门帮你找好玩的地方！\n\n只要告诉我：\n• 想去哪个城市玩 → 我帮你推荐景点\n• 想了解哪个景点 → 我给你详细介绍\n\n比如问我\"郑州方特怎么样\"或\"开封有什么好玩的\"都可以哦！\n\n开始你的旅程吧 🚀",
         "connected": false
       },
       {
@@ -405,7 +405,7 @@
         "key": "isResponseAnswerText",
         "type": "hidden",
         "label": "apps.templates.userChatInput.Return to AI Content",
-        "value": true,
+        "value": false,
         "valueType": "boolean",
         "showTargetInApp": false,
         "showTargetInPlugin": false,
@@ -448,7 +448,7 @@
         "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "value": "## 角色：\n\n你是用于提取特定词语的工具，严格执行自己的规则，不会做规定外的事情\n\n## 规则：\n\n1. 请提取用户输入中的地点并输出，不做其他无关操作\n2. 景点名称被视为地点\n3. 提取的词语尽可能保留原有的连续性，不可过度分割\n4. 多个输出以,分隔，不可使用其他格式\n\n## 示例\n\n输入：郑州方特在哪？好玩吗\n\n输出：郑州方特\n\n\n\n输入：开封万岁山武侠城和上海迪士尼哪个好玩？\n\n输出：开封万岁山武侠城,上海迪士尼\n\n",
+        "value": "## 角色：\n\n你是用于提取特定词语的工具，严格执行自己的规则，不会做规定外的事情\n\n## 规则：\n\n1. 请提取用户输入中的地点并输出，不做其他无关操作\n2. 景点名称被视为地点\n3. 提取的词语尽可能保留原有的连续性，不可过度分割\n4. 多个输出以,分隔，不可使用其他格式\n5. 若用户输入中无法提取出地点，则完整输出用户全部输入，并在末尾打上标签（无关信息）\n6. 你的输出应该直接流向下一个流程，不应该打印出来\n\n## 示例\n\n输入：郑州方特在哪？好玩吗\n\n输出：郑州方特\n\n\n\n输入：开封万岁山武侠城和上海迪士尼哪个好玩？\n\n输出：开封万岁山武侠城,上海迪士尼\n\n输入：你好，请介绍一下自己\n\n输出：你好，请介绍一下自己（无关信息）",
         "connected": false
       },
       {
@@ -644,52 +644,10 @@
         "type": "hidden",
         "targets": [
           {
-            "moduleId": "k4qp4o",
-            "key": "text"
+            "moduleId": "c7y3sm",
+            "key": "userChatInput"
           }
         ]
-      }
-    ]
-  },
-  {
-    "moduleId": "k4qp4o",
-    "name": "apps.templates.cq.Designated reply",
-    "avatar": "/imgs/module/reply.svg",
-    "flowType": "answerNode",
-    "position": {
-      "x": -485.75428473678534,
-      "y": 3400.0410588831464
-    },
-    "inputs": [
-      {
-        "key": "switch",
-        "type": "target",
-        "label": "apps.templates.userChatInput.Trigger",
-        "valueType": "any",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": false
-      },
-      {
-        "key": "text",
-        "type": "textarea",
-        "valueType": "any",
-        "label": "apps.templates.cq.Response content",
-        "description": "apps.templates.cq.Response content description",
-        "placeholder": "apps.templates.cq.Response content description",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": true
-      }
-    ],
-    "outputs": [
-      {
-        "key": "finish",
-        "label": "apps.templates.userChatInput.Running done",
-        "description": "apps.templates.userChatInput.Running done trigger",
-        "valueType": "boolean",
-        "type": "source",
-        "targets": []
       }
     ]
   },
@@ -923,6 +881,194 @@
             "key": "text"
           }
         ]
+      }
+    ]
+  },
+  {
+    "moduleId": "c7y3sm",
+    "name": "apps.templates.userChatInput.AI Dialogue",
+    "avatar": "/imgs/module/ai.svg",
+    "flowType": "chatNode",
+    "showStatus": true,
+    "position": {
+      "x": -493.7351203895322,
+      "y": 3386.755556359617
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "model",
+        "type": "selectChatModel",
+        "label": "apps.templates.userChatInput.dialog model",
+        "required": true,
+        "valueType": "string",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "ep-20250213141319-tbks4",
+        "connected": false
+      },
+      {
+        "key": "temperature",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Temperature",
+        "value": 0,
+        "valueType": "number",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "markList": [
+          {
+            "label": "apps.templates.userChatInput.Strict",
+            "value": 0
+          },
+          {
+            "label": "apps.templates.userChatInput.Divergent",
+            "value": 10
+          }
+        ],
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "maxToken",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Response limit",
+        "value": 0,
+        "valueType": "number",
+        "min": 100,
+        "max": 4000,
+        "step": 50,
+        "markList": [
+          {
+            "label": "100",
+            "value": 100
+          },
+          {
+            "label": "4000",
+            "value": 4000
+          }
+        ],
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "isResponseAnswerText",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Return to AI Content",
+        "value": true,
+        "valueType": "boolean",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "quoteTemplate",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Citation Content Templates",
+        "valueType": "string",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "quotePrompt",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Quote content prompts",
+        "valueType": "string",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "aiSettings",
+        "type": "aiSettings",
+        "label": "",
+        "valueType": "any",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "systemPrompt",
+        "type": "textarea",
+        "label": "apps.templates.userChatInput.System prompt words",
+        "max": 300,
+        "valueType": "string",
+        "description": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
+        "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "value": "# 角色\n你是旅游小助手，只提供旅游相关的内容，不涉及生活的方面，如天气温度等内容\n\n# 规则\n根据用户输入，当用户输入的内容与旅游助手功能无关时，需向用户发出提示，并对其输入内容进行简要分析后生成回复。\n或者如果是因为输入只是简单的询问，可以提醒用户可以输入大概目标以便进行分析",
+        "connected": false
+      },
+      {
+        "key": "history",
+        "type": "numberInput",
+        "label": "apps.templates.userChatInput.Chat history",
+        "required": true,
+        "min": 0,
+        "max": 30,
+        "valueType": "chatHistory",
+        "value": 1,
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "quoteQA",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Quoted content",
+        "description": "apps.templates.userChatInput.Object Array Format",
+        "valueType": "datasetQuote",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "userChatInput",
+        "type": "target",
+        "label": "apps.templates.userChatInput.User question",
+        "required": true,
+        "valueType": "string",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      }
+    ],
+    "outputs": [
+      {
+        "key": "history",
+        "label": "apps.templates.userChatInput.New context",
+        "description": "apps.templates.userChatInput.Splice this reply into the history",
+        "valueType": "chatHistory",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "answerText",
+        "label": "chat.AI response content",
+        "description": "apps.templates.userChatInput.will be triggered when the stream has finished replying",
+        "valueType": "string",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
       }
     ]
   }
