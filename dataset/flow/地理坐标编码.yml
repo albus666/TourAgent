@@ -1,0 +1,226 @@
+app:
+  description: '待解析的地址。最多支持84个字节。
+
+    可以输入两种样式的值，分别是：
+
+    1、标准的结构化地址信息，如北京市海淀区上地十街十号【推荐，地址结构越完整，解析精度越高】
+
+    2、支持“*路与*路交叉口”描述方式，如北一环路和阜阳路的交叉路口
+
+    第二种方式并不总是有返回结果，只有当地址库中存在该地址描述时才有返回。'
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 地理坐标编码
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: http-request
+      id: 1742800773427-source-1742807212387-target
+      source: '1742800773427'
+      sourceHandle: source
+      target: '1742807212387'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1742807212387-source-1742809475220-target
+      source: '1742807212387'
+      sourceHandle: source
+      target: '1742809475220'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1742809475220-source-1742807671232-target
+      source: '1742809475220'
+      sourceHandle: source
+      target: '1742807671232'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: address
+          max_length: 200
+          options: []
+          required: true
+          type: text-input
+          variable: address
+      height: 90
+      id: '1742800773427'
+      position:
+        x: -230.08435903163019
+        y: 173.80035131662265
+      positionAbsolute:
+        x: -230.08435903163019
+        y: 173.80035131662265
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        method: get
+        params: 'address:{{#1742800773427.address#}}
+
+          output:json
+
+          ak:Hu01H6gQJVUo2i0ZSoxjwUIw7Nw09WnE'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP 请求
+        type: http-request
+        url: https://api.map.baidu.com/geocoding/v3
+        variables: []
+      height: 136
+      id: '1742807212387'
+      position:
+        x: 177.6900706423385
+        y: 185.6759225135787
+      positionAbsolute:
+        x: 177.6900706423385
+        y: 185.6759225135787
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1742809475220'
+          - result
+          variable: result
+        selected: false
+        title: 结束
+        type: end
+      height: 90
+      id: '1742807671232'
+      position:
+        x: 1094.9033387376921
+        y: 185.6759225135787
+      positionAbsolute:
+        x: 1094.9033387376921
+        y: 185.6759225135787
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\n\n\ndef main(arg1: str) -> dict:\n    \n    outer_dict\
+          \ = json.loads(arg1)\n        \n    value1=outer_dict['result']\n    value2=value1['location']\n\
+          \    lng = value2['lng']\n    lat = value2['lat']\n    return {\"result\"\
+          :f\"lng: {lng} lat: {lat}\" }\n\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 代码执行
+        type: code
+        variables:
+        - value_selector:
+          - '1742807212387'
+          - body
+          variable: arg1
+      height: 54
+      id: '1742809475220'
+      position:
+        x: 543.441123721282
+        y: 185.6759225135787
+      positionAbsolute:
+        x: 543.441123721282
+        y: 185.6759225135787
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: -214.24027518326716
+      y: 278.1803413755499
+      zoom: 0.7578582832551989
+  rag_pipeline_variables: []

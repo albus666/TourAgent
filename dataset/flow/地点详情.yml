@@ -1,0 +1,219 @@
+app:
+  description: 地点详情检索服务
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 地点详情
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: http-request
+      id: 1742800773427-source-1742807212387-target
+      source: '1742800773427'
+      sourceHandle: source
+      target: '1742807212387'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1742807212387-source-1742809475220-target
+      source: '1742807212387'
+      sourceHandle: source
+      target: '1742809475220'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1742809475220-source-1742807671232-target
+      source: '1742809475220'
+      sourceHandle: source
+      target: '1742807671232'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: uid
+          max_length: 100
+          options: []
+          required: true
+          type: text-input
+          variable: uid
+      height: 90
+      id: '1742800773427'
+      position:
+        x: -322.4499127857328
+        y: 43.169068150106085
+      positionAbsolute:
+        x: -322.4499127857328
+        y: 43.169068150106085
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        method: get
+        params: 'output:json
+
+          ak:Hu01H6gQJVUo2i0ZSoxjwUIw7Nw09WnE
+
+          scope:2
+
+          uid:{{#1742800773427.uid#}}'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP 请求
+        type: http-request
+        url: https://api.map.baidu.com/place/v2/detail
+        variables: []
+      height: 136
+      id: '1742807212387'
+      position:
+        x: 177.6900706423385
+        y: 185.6759225135787
+      positionAbsolute:
+        x: 177.6900706423385
+        y: 185.6759225135787
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1742809475220'
+          - result
+          variable: result
+        selected: false
+        title: 结束
+        type: end
+      height: 90
+      id: '1742807671232'
+      position:
+        x: 1094.9033387376921
+        y: 185.6759225135787
+      positionAbsolute:
+        x: 1094.9033387376921
+        y: 185.6759225135787
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\n\n\ndef main(arg1: str) -> dict:\n    \n    outer_dict\
+          \ = json.loads(arg1)\n        \n    value1=outer_dict['result']\n    \n\
+          \    return {\"result\":str(value1) }\n\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 代码执行
+        type: code
+        variables:
+        - value_selector:
+          - '1742807212387'
+          - body
+          variable: arg1
+      height: 54
+      id: '1742809475220'
+      position:
+        x: 543.441123721282
+        y: 185.6759225135787
+      positionAbsolute:
+        x: 543.441123721282
+        y: 185.6759225135787
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: -562.4071959716078
+      y: 167.67624425951593
+      zoom: 0.8467453109632036
+  rag_pipeline_variables: []

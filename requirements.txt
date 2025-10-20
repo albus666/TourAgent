@@ -1,1 +1,1 @@
-# pip install fastapi jinja2 requests jieba wordcloud bs4 uvicorn
+# pip install fastapi jinja2 requests jieba bs4 uvicorn

@@ -36,6 +36,7 @@
         "label": "core.app.Question Guide",
         "showTargetInApp": false,
         "showTargetInPlugin": false,
+        "value": false,
         "connected": false
       },
       {

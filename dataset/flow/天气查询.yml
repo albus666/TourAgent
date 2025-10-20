@@ -1,0 +1,176 @@
+app:
+  description: 根据经纬度坐标进行天气查询，location为需要查询地区的以英文逗号分隔的经度,纬度坐标
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 天气查询
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: http-request
+      id: 1742893661573-source-1742894359603-target
+      source: '1742893661573'
+      sourceHandle: source
+      target: '1742894359603'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: end
+      id: 1742894359603-source-1742894849033-target
+      source: '1742894359603'
+      sourceHandle: source
+      target: '1742894849033'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: location
+          max_length: 100
+          options: []
+          required: true
+          type: text-input
+          variable: location
+      height: 87
+      id: '1742893661573'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        method: get
+        params: 'location:{{#1742893661573.location#}}
+
+          key:e7b2b82fc901488abcf0b4961b84bdfe
+
+          lang:zh'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: true
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: weather
+        type: http-request
+        url: https://devapi.qweather.com/v7/grid-weather/now
+        variables: []
+      height: 136
+      id: '1742894359603'
+      position:
+        x: 429
+        y: 273
+      positionAbsolute:
+        x: 429
+        y: 273
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1742894359603'
+          - body
+          variable: result
+        selected: false
+        title: 结束
+        type: end
+      height: 87
+      id: '1742894849033'
+      position:
+        x: 857.264497306531
+        y: 273
+      positionAbsolute:
+        x: 857.264497306531
+        y: 273
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: 30.10864899872962
+      y: 296.18899537278276
+      zoom: 0.49311636675225545
+  rag_pipeline_variables: []

@@ -1,0 +1,507 @@
+app:
+  description: 需要有目的地坐标和起点坐标，以及出行方式如，驾车、骑行、步行、公交交通。支持驾车、骑行、步行、公交路线规划，支持中国大陆地区。
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 路线规划
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/volcengine_maas:0.0.9@89e719fd718aaf97165b1833202e8db8a4e553cf7291291cc376e4b50245f1cd
+    version: null
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 1742807212387-source-1742809475220-target
+      source: '1742807212387'
+      sourceHandle: source
+      target: '1742809475220'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1742809475220-source-1742807671232-target
+      source: '1742809475220'
+      sourceHandle: source
+      target: '1742807671232'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: http-request
+      id: 1742886110615-1-1742807212387-target
+      source: '1742886110615'
+      sourceHandle: '1'
+      target: '1742807212387'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: http-request
+      id: 1742886110615-2-17428859742790-target
+      source: '1742886110615'
+      sourceHandle: '2'
+      target: '17428859742790'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: http-request
+      id: 1742886110615-1742886116148-17428859865500-target
+      source: '1742886110615'
+      sourceHandle: '1742886116148'
+      target: '17428859865500'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: http-request
+      id: 1742886110615-1742886116933-17428859890400-target
+      source: '1742886110615'
+      sourceHandle: '1742886116933'
+      target: '17428859890400'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: question-classifier
+      id: 1742800773427-source-1742886110615-target
+      source: '1742800773427'
+      sourceHandle: source
+      target: '1742886110615'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 17428859742790-source-1742809475220-target
+      source: '17428859742790'
+      sourceHandle: source
+      target: '1742809475220'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 17428859865500-source-1742809475220-target
+      source: '17428859865500'
+      sourceHandle: source
+      target: '1742809475220'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: http-request
+        targetType: code
+      id: 17428859890400-source-1742809475220-target
+      source: '17428859890400'
+      sourceHandle: source
+      target: '1742809475220'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: start
+        type: start
+        variables:
+        - label: destination
+          max_length: 100
+          options: []
+          required: true
+          type: text-input
+          variable: destination
+        - label: origin
+          max_length: 100
+          options: []
+          required: true
+          type: text-input
+          variable: origin
+        - label: travel_mode
+          max_length: 100
+          options: []
+          required: true
+          type: text-input
+          variable: travel_mode
+      height: 139
+      id: '1742800773427'
+      position:
+        x: -698.786405383684
+        y: 177.96454065413423
+      positionAbsolute:
+        x: -698.786405383684
+        y: 177.96454065413423
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        method: get
+        params: 'output:json
+
+          ak:Hu01H6gQJVUo2i0ZSoxjwUIw7Nw09WnE
+
+          destination:{{#1742800773427.destination#}}
+
+          origin:{{#1742800773427.origin#}}'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: driving
+        type: http-request
+        url: https://api.map.baidu.com/directionlite/v1/driving
+        variables: []
+      height: 136
+      id: '1742807212387'
+      position:
+        x: 17.294309441648238
+        y: 1.6634276463347248
+      positionAbsolute:
+        x: 17.294309441648238
+        y: 1.6634276463347248
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1742809475220'
+          - result
+          variable: result
+        selected: false
+        title: over
+        type: end
+      height: 87
+      id: '1742807671232'
+      position:
+        x: 1005.3674529781795
+        y: 177.96454065413423
+      positionAbsolute:
+        x: 1005.3674529781795
+        y: 177.96454065413423
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import json\ndef find_non_empty_arg(arg1, arg2, arg3, arg4):\n    #\
+          \ 检查每个参数是否为空，并将第一个非空的值赋给arg1\n    if arg1:\n        return arg1,1\n    elif\
+          \ arg2:\n        return arg2,2\n    elif arg3:\n        return arg3,3\n\
+          \    elif arg4:\n        return arg4,4\n    else:\n        return None,0\n\
+          \ndef main(arg1: str,arg2: str,arg3: str,arg4: str) -> dict:\n    arg1,sort=find_non_empty_arg(arg1,\
+          \ arg2, arg3, arg4)\n    if sort==4:\n        return {\"result\":arg1}\n\
+          \    LUXian=\"\"\n    outer_dict =json.loads(arg1)\n        \n    data=outer_dict['result']\n\
+          \    origin = data[\"origin\"]\n    destination = data[\"destination\"]\n\
+          \    distance = data[\"routes\"][0][\"distance\"]\n    duration = data[\"\
+          routes\"][0][\"duration\"]\n    steps = data[\"routes\"][0][\"steps\"]\n\
+          \n    info_str = f\"起点：{origin}\\n终点：{destination}\\n总距离：{distance} 米\\\
+          n总耗时：{duration} 秒\"\n\n    \n    for step in steps:\n        instruction\
+          \ = step[\"instruction\"]\n    # 提取关键信息，例如去掉HTML标签\n        simplified_instruction\
+          \ = instruction.replace(\"<b>\", \"\").replace(\"</b>\", \"\")\n       \
+          \ LUXian+=simplified_instruction+\"\\n\"\n    return {\"result\":info_str+\"\
+          \\n\"+LUXian }\n\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: Information Processing
+        type: code
+        variables:
+        - value_selector:
+          - '1742807212387'
+          - body
+          variable: arg1
+        - value_selector:
+          - '17428859742790'
+          - body
+          variable: arg2
+        - value_selector:
+          - '17428859865500'
+          - body
+          variable: arg3
+        - value_selector:
+          - '17428859890400'
+          - body
+          variable: arg4
+      height: 51
+      id: '1742809475220'
+      position:
+        x: 556.8066034898985
+        y: 177.96454065413423
+      positionAbsolute:
+        x: 556.8066034898985
+        y: 177.96454065413423
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        method: get
+        params: 'output:json
+
+          ak:Hu01H6gQJVUo2i0ZSoxjwUIw7Nw09WnE
+
+          destination:{{#1742800773427.destination#}}
+
+          origin:{{#1742800773427.origin#}}'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: riding
+        type: http-request
+        url: https://api.map.baidu.com/directionlite/v1/riding
+        variables: []
+      height: 136
+      id: '17428859742790'
+      position:
+        x: 17.294309441648238
+        y: 137.04069284956495
+      positionAbsolute:
+        x: 17.294309441648238
+        y: 137.04069284956495
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        method: get
+        params: 'output:json
+
+          ak:Hu01H6gQJVUo2i0ZSoxjwUIw7Nw09WnE
+
+          destination:{{#1742800773427.destination#}}
+
+          origin:{{#1742800773427.origin#}}'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: walking
+        type: http-request
+        url: https://api.map.baidu.com/directionlite/v1/walking
+        variables: []
+      height: 136
+      id: '17428859865500'
+      position:
+        x: 17.294309441648238
+        y: 278.806909497589
+      positionAbsolute:
+        x: 17.294309441648238
+        y: 278.806909497589
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data: []
+          type: none
+        desc: ''
+        headers: ''
+        method: get
+        params: 'output:json
+
+          ak:Hu01H6gQJVUo2i0ZSoxjwUIw7Nw09WnE
+
+          destination:{{#1742800773427.destination#}}
+
+          origin:{{#1742800773427.origin#}}'
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: transit
+        type: http-request
+        url: https://api.map.baidu.com/directionlite/v1/transit
+        variables: []
+      height: 136
+      id: '17428859890400'
+      position:
+        x: 17.294309441648238
+        y: 410.90584258127825
+      positionAbsolute:
+        x: 17.294309441648238
+        y: 410.90584258127825
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        classes:
+        - id: '1'
+          name: 驾车
+        - id: '2'
+          name: 骑行
+        - id: '1742886116148'
+          name: 步行
+        - id: '1742886116933'
+          name: 公共交通
+        desc: ''
+        instructions: ''
+        model:
+          completion_params:
+            temperature: 0.4
+          mode: chat
+          name: Doubao-1.5-pro-32k
+          provider: langgenius/volcengine_maas/volcengine_maas
+        query_variable_selector:
+        - '1742800773427'
+        - travel_mode
+        selected: false
+        title: question sort
+        topics: []
+        type: question-classifier
+        vision:
+          enabled: false
+      height: 245
+      id: '1742886110615'
+      position:
+        x: -381.5319659293892
+        y: 131.90012370778936
+      positionAbsolute:
+        x: -381.5319659293892
+        y: 131.90012370778936
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: 791.6626761830519
+      y: -12.681961777378262
+      zoom: 1.2745606205790154
+  rag_pipeline_variables: []
