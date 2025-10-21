@@ -5,8 +5,8 @@
     "avatar": "/imgs/module/userGuide.png",
     "flowType": "userGuide",
     "position": {
-      "x": -2977.109938148764,
-      "y": 2040.7423525983215
+      "x": 58.677520296315606,
+      "y": 2263.892964439869
     },
     "inputs": [
       {
@@ -16,7 +16,7 @@
         "label": "apps.templates.basicChat.Opening statement",
         "showTargetInApp": false,
         "showTargetInPlugin": false,
-        "value": "你好呀！👋\n\n我是你的旅游小助手，专门帮你找好玩的地方！\n\n只要告诉我：\n• 想去哪个城市玩 → 我帮你推荐景点\n• 想了解哪个景点 → 我给你详细介绍\n\n比如问我\"郑州方特怎么样\"或\"开封有什么好玩的\"都可以哦！\n\n开始你的旅程吧 🚀",
+        "value": "你好呀！👋 我是你的**智能旅游规划助手**！\n\\n\n\n🌍 **我能做什么？**\n我直连**携程旅游数据库**，实时为你获取国内外热门景点信息，让你的旅行规划更轻松：\n\\n\n\n✨ **景点详情查询** - 想知道某个景点怎么样？我给你详细介绍、评分、游客评价  \n🗺️ **城市景点推荐** - 告诉我你想去哪个城市，我帮你找出最值得去的景点  \n📋 **旅游路线规划** - 根据你的偏好，为你量身定制旅行计划\n\\n\n\n💬 **怎么问我？**\n   - 开封有什么好玩的景点？\n   - 清明上河园怎么样？]\n   - 帮我规划一下郑州去上海的三日游\n\n快来开启你的精彩旅程吧！🚀",
         "connected": false
       },
       {
@@ -36,7 +36,7 @@
         "label": "core.app.Question Guide",
         "showTargetInApp": false,
         "showTargetInPlugin": false,
-        "value": false,
+        "value": true,
         "connected": false
       },
       {
@@ -57,8 +57,8 @@
     "avatar": "/imgs/module/userChatInput.svg",
     "flowType": "questionInput",
     "position": {
-      "x": -3016.2623416978513,
-      "y": 1500.1704723121875
+      "x": 108.17817421330108,
+      "y": 867.136341117131
     },
     "inputs": [
       {
@@ -79,7 +79,11 @@
         "valueType": "string",
         "targets": [
           {
-            "moduleId": "5ipggu",
+            "moduleId": "chatModule",
+            "key": "userChatInput"
+          },
+          {
+            "moduleId": "pht3uv",
             "key": "userChatInput"
           }
         ]
@@ -87,253 +91,14 @@
     ]
   },
   {
-    "moduleId": "pumowi",
-    "name": "apps.templates.cq.Designated reply",
-    "avatar": "/imgs/module/reply.svg",
-    "flowType": "answerNode",
-    "position": {
-      "x": 259.8894504318653,
-      "y": 1420.6888006390407
-    },
-    "inputs": [
-      {
-        "key": "switch",
-        "type": "target",
-        "label": "apps.templates.userChatInput.Trigger",
-        "valueType": "any",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": false
-      },
-      {
-        "key": "text",
-        "type": "textarea",
-        "valueType": "any",
-        "label": "apps.templates.cq.Response content",
-        "description": "apps.templates.cq.Response content description",
-        "placeholder": "apps.templates.cq.Response content description",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "value": "",
-        "connected": true
-      }
-    ],
-    "outputs": [
-      {
-        "key": "finish",
-        "label": "apps.templates.userChatInput.Running done",
-        "description": "apps.templates.userChatInput.Running done trigger",
-        "valueType": "boolean",
-        "type": "source",
-        "targets": []
-      }
-    ]
-  },
-  {
-    "moduleId": "bhkosv",
-    "name": "景点推荐",
-    "avatar": "/imgs/module/http.svg",
-    "flowType": "httpRequest",
-    "showStatus": true,
-    "position": {
-      "x": -496.8917826102646,
-      "y": 1224.1753514658008
-    },
-    "inputs": [
-      {
-        "key": "switch",
-        "type": "target",
-        "label": "apps.templates.userChatInput.Trigger",
-        "valueType": "any",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": true
-      },
-      {
-        "key": "system_httpMethod",
-        "type": "custom",
-        "valueType": "string",
-        "label": "",
-        "value": "GET",
-        "required": true,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "system_httpReqUrl",
-        "type": "hidden",
-        "valueType": "string",
-        "label": "",
-        "description": "core.module.input.description.Http Request Url",
-        "placeholder": "https://api.ai.com/getInventory",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "value": "http://www.atopes.xyz:4399/search",
-        "connected": false
-      },
-      {
-        "key": "system_httpHeader",
-        "type": "custom",
-        "valueType": "any",
-        "value": [],
-        "label": "",
-        "description": "core.module.input.description.Http Request Header",
-        "placeholder": "core.module.input.description.Http Request Header",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "system_httpParams",
-        "type": "hidden",
-        "valueType": "any",
-        "value": [
-          {
-            "key": "cityNames",
-            "type": "string",
-            "value": "{{cityNames}}"
-          },
-          {
-            "key": "sightNames",
-            "value": "上海迪士尼,北京天安门",
-            "type": "string"
-          }
-        ],
-        "label": "",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "system_httpJsonBody",
-        "type": "hidden",
-        "valueType": "any",
-        "value": "",
-        "label": "",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "DYNAMIC_INPUT_KEY",
-        "type": "target",
-        "valueType": "any",
-        "label": "core.module.inputType.dynamicTargetInput",
-        "description": "core.module.input.description.dynamic input",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": true,
-        "hideInApp": true,
-        "connected": false
-      },
-      {
-        "valueType": "string",
-        "label": "cityNames",
-        "type": "target",
-        "required": true,
-        "description": "",
-        "edit": true,
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "required": true,
-          "dataType": true
-        },
-        "connected": true,
-        "key": "cityNames"
-      },
-      {
-        "key": "system_addInputParam",
-        "type": "addInputParam",
-        "valueType": "any",
-        "label": "",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "required": true,
-          "dataType": true
-        },
-        "defaultEditField": {
-          "label": "",
-          "key": "",
-          "description": "",
-          "inputType": "target",
-          "valueType": "string",
-          "required": true
-        },
-        "connected": false
-      }
-    ],
-    "outputs": [
-      {
-        "key": "finish",
-        "label": "apps.templates.userChatInput.Running done",
-        "description": "apps.templates.userChatInput.Running done trigger",
-        "valueType": "boolean",
-        "type": "source",
-        "targets": []
-      },
-      {
-        "key": "system_addOutputParam",
-        "type": "addOutputParam",
-        "valueType": "any",
-        "label": "",
-        "targets": [],
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "dataType": true
-        },
-        "defaultEditField": {
-          "label": "",
-          "key": "",
-          "description": "",
-          "outputType": "source",
-          "valueType": "string"
-        }
-      },
-      {
-        "type": "source",
-        "valueType": "string",
-        "key": "message",
-        "label": "message",
-        "description": "",
-        "edit": true,
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "dataType": true
-        },
-        "targets": [
-          {
-            "moduleId": "pumowi",
-            "key": "text"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "moduleId": "5ipggu",
-    "name": "apps.templates.userChatInput.AI Dialogue",
+    "moduleId": "chatModule",
+    "name": "文本预处理",
     "avatar": "/imgs/module/ai.svg",
     "flowType": "chatNode",
     "showStatus": true,
     "position": {
-      "x": -2109.7330703252373,
-      "y": 885.8896844430853
+      "x": 796.2202725683323,
+      "y": 1541.9808049238563
     },
     "inputs": [
       {
@@ -449,7 +214,7 @@
         "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "value": "## 角色：\n\n你是用于提取特定词语的工具，严格执行自己的规则，不会做规定外的事情\n\n## 规则：\n\n1. 请提取用户输入中的地点并输出，不做其他无关操作\n2. 景点名称被视为地点\n3. 提取的词语尽可能保留原有的连续性，不可过度分割\n4. 多个输出以,分隔，不可使用其他格式\n5. 若用户输入中无法提取出地点，则完整输出用户全部输入，并在末尾打上标签（无关信息）\n6. 你的输出应该直接流向下一个流程，不应该打印出来\n\n## 示例\n\n输入：郑州方特在哪？好玩吗\n\n输出：郑州方特\n\n\n\n输入：开封万岁山武侠城和上海迪士尼哪个好玩？\n\n输出：开封万岁山武侠城,上海迪士尼\n\n输入：你好，请介绍一下自己\n\n输出：你好，请介绍一下自己（无关信息）",
+        "value": "## 角色\n\n你是用户输入文本预处理工具，负责验证和提取用户输入中的关键信息，严格按照规则执行。\n\n## 处理流程\n\n### 第一步：旅游相关性判断\n- 判断用户输入是否与旅游相关\n- 以下情况判定为 `其他问题`：\n  - 日常闲聊、问候（如\"你好\"、\"谢谢\"）\n  - 系统宣传语、引导语\n  - 与旅游无关的话题\n  - 无法理解的输入\n- 如果是旅游相关内容 → 进入第二步\n\n### 第二步：意图识别\n分析用户输入，判断属于以下哪种服务类型：\n\n**服务类型说明：**\n- **景点详情查询**：用户想了解某个具体景点的信息（评价、介绍、门票等）\n- **城市景点推荐**：用户想知道某个城市有哪些值得去的景点\n- **旅游路线规划**：用户想规划从一个地点到另一个地点的旅游路线\n\n**判断技巧：**\n- 提到具体景点名称 + 询问详情 → 景点详情查询\n- 提到城市名 + 询问推荐/有什么好玩的 → 城市景点推荐\n- 提到两个地点 + 路线/行程规划 → 旅游路线规划\n\n识别意图后 → 进入第三步\n\n### 第三步：信息提取\n\n#### 3.1 地点提取\n从用户输入中提取地点名称（城市名或景点名）：\n\n**提取要求：**\n1. **景点详情查询**：至少提取 1 个地点（景点名）\n2. **城市景点推荐**：至少提取 1 个地点（城市名）\n3. **旅游路线规划**：必须提取 2 个地点（起点、终点），按\"起点,终点\"顺序输出\n\n**提取规则：**\n- 保留地点名称的完整性，不可过度分割\n- 多个地点用英文逗号分隔：`地点1,地点2`\n- 景点名称视为地点\n- 如果地点数量不足 → 在提取结果字段中说明错误\n\n#### 3.2 出行方式提取（仅针对旅游路线规划）\n当意图为\"旅游路线规划\"时，需要识别用户的出行方式：\n\n**支持的出行方式：**\n- **自驾**：开车、自驾、驾车等\n- **骑行**：骑车、骑行、自行车等\n- **步行**：走路、步行、徒步等\n- **公共交通**：坐车、公交、地铁、公共交通、高铁、火车等\n\n**识别规则：**\n- 从用户输入中提取明确的出行方式关键词\n- 如果用户未明确说明出行方式，默认为：`自驾`\n- 只返回四种标准出行方式之一：`自驾`、`骑行`、`步行`、`公共交通`\n\n## 输出格式\n\n**必须严格按照以下 JSON 格式输出，不要添加任何额外文字：**\n\n### 景点详情查询 / 城市景点推荐 / 其他问题\n```json\n{\n  \"意图\": \"景点详情查询|城市景点推荐|旅游路线规划|其他问题\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"提取的地点信息或错误说明\"\n}\n```\n\n### 旅游路线规划\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"提取的地点信息或错误说明\",\n  \"出行方式\": \"自驾|骑行|步行|公共交通\"\n}\n```\n\n**字段说明：**\n- **意图**：识别出的服务类型，四选一\n- **原始文本**：用户输入的完整文本\n- **提取结果**：\n  - 成功提取：地点名称（如 `郑州方特` 或 `郑州,上海`）\n  - 地点不足：`地点信息不足，[服务类型]需要[数量]个地点`\n  - 其他问题：`与旅游无关或无法理解`\n- **出行方式**：仅在意图为\"旅游路线规划\"时返回，四选一\n\n## 示例\n\n**示例1：景点详情查询**\n- 用户输入：郑州方特怎么样？\n- 输出：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"郑州方特怎么样？\",\n  \"提取结果\": \"郑州方特\"\n}\n```\n\n**示例2：城市景点推荐**\n- 用户输入：开封有什么好玩的？\n- 输出：\n```json\n{\n  \"意图\": \"城市景点推荐\",\n  \"原始文本\": \"开封有什么好玩的？\",\n  \"提取结果\": \"开封\"\n}\n```\n\n**示例3：旅游路线规划（默认自驾）**\n- 用户输入：从北京到上海三日游怎么安排？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京到上海三日游怎么安排？\",\n  \"提取结果\": \"北京,上海\",\n  \"出行方式\": \"自驾\"\n}\n```\n\n**示例4：旅游路线规划（明确出行方式 - 公共交通）**\n- 用户输入：我想坐高铁从郑州到西安玩，怎么规划路线？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"我想坐高铁从郑州到西安玩，怎么规划路线？\",\n  \"提取结果\": \"郑州,西安\",\n  \"出行方式\": \"公共交通\"\n}\n```\n\n**示例5：旅游路线规划（明确出行方式 - 骑行）**\n- 用户输入：骑自行车从杭州西湖到灵隐寺怎么走？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"骑自行车从杭州西湖到灵隐寺怎么走？\",\n  \"提取结果\": \"杭州西湖,灵隐寺\",\n  \"出行方式\": \"骑行\"\n}\n```\n\n**示例6：旅游路线规划（明确出行方式 - 步行）**\n- 用户输入：从天安门走到故宫要多久？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从天安门走到故宫要多久？\",\n  \"提取结果\": \"天安门,故宫\",\n  \"出行方式\": \"步行\"\n}\n```\n\n**示例7：旅游路线规划（明确出行方式 - 自驾）**\n- 用户输入：自驾从成都到九寨沟的路线推荐\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"自驾从成都到九寨沟的路线推荐\",\n  \"提取结果\": \"成都,九寨沟\",\n  \"出行方式\": \"自驾\"\n}\n```\n\n**示例8：其他问题**\n- 用户输入：你好，请介绍一下自己\n- 输出：\n```json\n{\n  \"意图\": \"其他问题\",\n  \"原始文本\": \"你好，请介绍一下自己\",\n  \"提取结果\": \"与旅游无关或无法理解\"\n}\n```\n\n**示例9：景点详情查询（多个景点）**\n- 用户输入：开封万岁山武侠城和上海迪士尼哪个好玩？\n- 输出：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"开封万岁山武侠城和上海迪士尼哪个好玩？\",\n  \"提取结果\": \"开封万岁山武侠城,上海迪士尼\"\n}\n```\n\n**示例10：路线规划地点不足**\n- 用户输入：从北京出发旅游三天\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京出发旅游三天\",\n  \"提取结果\": \"地点信息不足，旅游路线规划需要2个地点（起点和终点）\",\n  \"出行方式\": \"自驾\"\n}\n```\n\n## 注意事项\n\n- 你的输出将直接流向下一个流程，必须是有效的 JSON 格式\n- 严格按照输出格式返回结果，不要添加额外解释或markdown标记\n- 只返回 JSON 对象，不进行对话\n- 仔细分析用户意图，准确判断服务类型\n- **旅游路线规划**必须包含\"出行方式\"字段，其他意图类型不需要该字段\n- 出行方式识别优先匹配用户输入中的明确关键词，无关键词时默认返回自驾",
         "connected": false
       },
       {
@@ -488,14 +253,6 @@
     ],
     "outputs": [
       {
-        "key": "history",
-        "label": "apps.templates.userChatInput.New context",
-        "description": "apps.templates.userChatInput.Splice this reply into the history",
-        "valueType": "chatHistory",
-        "type": "source",
-        "targets": []
-      },
-      {
         "key": "answerText",
         "label": "chat.AI response content",
         "description": "apps.templates.userChatInput.will be triggered when the stream has finished replying",
@@ -503,16 +260,12 @@
         "type": "source",
         "targets": [
           {
-            "moduleId": "kcnivg",
+            "moduleId": "cimtzq",
             "key": "userChatInput"
           },
           {
-            "moduleId": "bhkosv",
-            "key": "cityNames"
-          },
-          {
-            "moduleId": "n8omvv",
-            "key": "sightNames"
+            "moduleId": "yeovv8",
+            "key": "content"
           }
         ]
       },
@@ -523,377 +276,26 @@
         "valueType": "boolean",
         "type": "source",
         "targets": []
-      }
-    ]
-  },
-  {
-    "moduleId": "kcnivg",
-    "name": "apps.templates.cq.Question categorization",
-    "avatar": "/imgs/module/cq.svg",
-    "flowType": "classifyQuestion",
-    "showStatus": true,
-    "position": {
-      "x": -1581.2146449787192,
-      "y": 1878.5692817312597
-    },
-    "inputs": [
-      {
-        "key": "switch",
-        "type": "target",
-        "label": "apps.templates.userChatInput.Trigger",
-        "valueType": "any",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": false
-      },
-      {
-        "key": "model",
-        "type": "selectCQModel",
-        "valueType": "string",
-        "label": "apps.templates.cq.Categorization model",
-        "required": true,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "value": "ep-20250213141319-tbks4",
-        "connected": false
-      },
-      {
-        "key": "systemPrompt",
-        "type": "textarea",
-        "valueType": "string",
-        "label": "apps.templates.cq.Background knowledge",
-        "description": "apps.templates.cq.You can add some content-specific introductions",
-        "placeholder": "apps.templates.cq.You can add some content-specific introductions placeholder",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "value": "你是意图分析助手，只处理旅游相关问题，用户的输入被分为三类：\n1. 景点推荐分析\n2. 景点详情分析\n3.无关问题\n\n下面是分析的技巧：如果获得的关键词提取为城市名，则大概率为景点推荐分析，如果为具体景点名，则为景点详情分析",
-        "connected": false
       },
       {
         "key": "history",
-        "type": "numberInput",
-        "label": "apps.templates.userChatInput.Chat history",
-        "required": true,
-        "min": 0,
-        "max": 30,
+        "label": "apps.templates.userChatInput.New context",
+        "description": "apps.templates.userChatInput.Splice this reply into the history",
         "valueType": "chatHistory",
-        "value": 0,
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": false
-      },
-      {
-        "key": "userChatInput",
-        "type": "target",
-        "label": "apps.templates.userChatInput.User question",
-        "required": true,
-        "valueType": "string",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": true
-      },
-      {
-        "key": "agents",
-        "type": "custom",
-        "valueType": "any",
-        "label": "",
-        "value": [
-          {
-            "value": "景点推荐分析",
-            "key": "wqre"
-          },
-          {
-            "value": "景点详情分析",
-            "key": "sdfa"
-          },
-          {
-            "value": "无关问题",
-            "key": "agex"
-          }
-        ],
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      }
-    ],
-    "outputs": [
-      {
-        "key": "wqre",
-        "label": "",
-        "type": "hidden",
-        "targets": [
-          {
-            "moduleId": "bhkosv",
-            "key": "switch"
-          }
-        ]
-      },
-      {
-        "key": "sdfa",
-        "label": "",
-        "type": "hidden",
-        "targets": [
-          {
-            "moduleId": "n8omvv",
-            "key": "switch"
-          }
-        ]
-      },
-      {
-        "key": "agex",
-        "label": "",
-        "type": "hidden",
-        "targets": [
-          {
-            "moduleId": "c7y3sm",
-            "key": "userChatInput"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "moduleId": "3q0tmk",
-    "name": "apps.templates.cq.Designated reply",
-    "avatar": "/imgs/module/reply.svg",
-    "flowType": "answerNode",
-    "position": {
-      "x": 226.77868724313754,
-      "y": 2174.6285716267366
-    },
-    "inputs": [
-      {
-        "key": "switch",
-        "type": "target",
-        "label": "apps.templates.userChatInput.Trigger",
-        "valueType": "any",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": false
-      },
-      {
-        "key": "text",
-        "type": "textarea",
-        "valueType": "any",
-        "label": "apps.templates.cq.Response content",
-        "description": "apps.templates.cq.Response content description",
-        "placeholder": "apps.templates.cq.Response content description",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": true
-      }
-    ],
-    "outputs": [
-      {
-        "key": "finish",
-        "label": "apps.templates.userChatInput.Running done",
-        "description": "apps.templates.userChatInput.Running done trigger",
-        "valueType": "boolean",
         "type": "source",
         "targets": []
       }
     ]
   },
   {
-    "moduleId": "n8omvv",
-    "name": "景点查询",
-    "avatar": "/imgs/module/http.svg",
-    "flowType": "httpRequest",
-    "showStatus": true,
-    "position": {
-      "x": -501.72585522206134,
-      "y": 2327.9675217115005
-    },
-    "inputs": [
-      {
-        "key": "switch",
-        "type": "target",
-        "label": "apps.templates.userChatInput.Trigger",
-        "valueType": "any",
-        "showTargetInApp": true,
-        "showTargetInPlugin": true,
-        "connected": true
-      },
-      {
-        "key": "system_httpMethod",
-        "type": "custom",
-        "valueType": "string",
-        "label": "",
-        "value": "GET",
-        "required": true,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "system_httpReqUrl",
-        "type": "hidden",
-        "valueType": "string",
-        "label": "",
-        "description": "core.module.input.description.Http Request Url",
-        "placeholder": "https://api.ai.com/getInventory",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "value": "http://www.atopes.xyz:4399/attraction",
-        "connected": false
-      },
-      {
-        "key": "system_httpHeader",
-        "type": "custom",
-        "valueType": "any",
-        "value": [],
-        "label": "",
-        "description": "core.module.input.description.Http Request Header",
-        "placeholder": "core.module.input.description.Http Request Header",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "system_httpParams",
-        "type": "hidden",
-        "valueType": "any",
-        "value": [
-          {
-            "key": "sightNames",
-            "value": "{{sightNames}}",
-            "type": "string"
-          }
-        ],
-        "label": "",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "system_httpJsonBody",
-        "type": "hidden",
-        "valueType": "any",
-        "value": "",
-        "label": "",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "connected": false
-      },
-      {
-        "key": "DYNAMIC_INPUT_KEY",
-        "type": "target",
-        "valueType": "any",
-        "label": "core.module.inputType.dynamicTargetInput",
-        "description": "core.module.input.description.dynamic input",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": true,
-        "hideInApp": true,
-        "connected": false
-      },
-      {
-        "valueType": "string",
-        "label": "sightNames",
-        "type": "target",
-        "required": true,
-        "description": "",
-        "edit": true,
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "required": true,
-          "dataType": true
-        },
-        "connected": true,
-        "key": "sightNames"
-      },
-      {
-        "key": "system_addInputParam",
-        "type": "addInputParam",
-        "valueType": "any",
-        "label": "",
-        "required": false,
-        "showTargetInApp": false,
-        "showTargetInPlugin": false,
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "required": true,
-          "dataType": true
-        },
-        "defaultEditField": {
-          "label": "",
-          "key": "",
-          "description": "",
-          "inputType": "target",
-          "valueType": "string",
-          "required": true
-        },
-        "connected": false
-      }
-    ],
-    "outputs": [
-      {
-        "key": "finish",
-        "label": "apps.templates.userChatInput.Running done",
-        "description": "apps.templates.userChatInput.Running done trigger",
-        "valueType": "boolean",
-        "type": "source",
-        "targets": []
-      },
-      {
-        "key": "system_addOutputParam",
-        "type": "addOutputParam",
-        "valueType": "any",
-        "label": "",
-        "targets": [],
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "dataType": true
-        },
-        "defaultEditField": {
-          "label": "",
-          "key": "",
-          "description": "",
-          "outputType": "source",
-          "valueType": "string"
-        }
-      },
-      {
-        "type": "source",
-        "valueType": "string",
-        "key": "message",
-        "label": "message",
-        "description": "",
-        "edit": true,
-        "editField": {
-          "key": true,
-          "name": true,
-          "description": true,
-          "dataType": true
-        },
-        "targets": [
-          {
-            "moduleId": "3q0tmk",
-            "key": "text"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "moduleId": "c7y3sm",
-    "name": "apps.templates.userChatInput.AI Dialogue",
+    "moduleId": "pht3uv",
+    "name": "AI回复",
     "avatar": "/imgs/module/ai.svg",
     "flowType": "chatNode",
     "showStatus": true,
     "position": {
-      "x": -493.7351203895322,
-      "y": 3386.755556359617
+      "x": 2573.664405215538,
+      "y": 295.92719457138793
     },
     "inputs": [
       {
@@ -903,7 +305,7 @@
         "valueType": "any",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "connected": false
+        "connected": true
       },
       {
         "key": "model",
@@ -1020,7 +422,7 @@
         "min": 0,
         "max": 30,
         "valueType": "chatHistory",
-        "value": 1,
+        "value": 0,
         "showTargetInApp": true,
         "showTargetInPlugin": true,
         "connected": false
@@ -1063,6 +465,798 @@
         "type": "source",
         "targets": []
       },
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "cimtzq",
+    "name": "意图识别",
+    "avatar": "/imgs/module/cq.svg",
+    "flowType": "classifyQuestion",
+    "showStatus": true,
+    "position": {
+      "x": 1428.2355100336497,
+      "y": 1109.3812420563827
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "model",
+        "type": "selectCQModel",
+        "valueType": "string",
+        "label": "apps.templates.cq.Categorization model",
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "ep-20250213141319-tbks4",
+        "connected": false
+      },
+      {
+        "key": "systemPrompt",
+        "type": "textarea",
+        "valueType": "string",
+        "label": "apps.templates.cq.Background knowledge",
+        "description": "apps.templates.cq.You can add some content-specific introductions",
+        "placeholder": "apps.templates.cq.You can add some content-specific introductions placeholder",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "value": "请根据输入的json文本中的“意图”一项直接判断分类",
+        "connected": false
+      },
+      {
+        "key": "history",
+        "type": "numberInput",
+        "label": "apps.templates.userChatInput.Chat history",
+        "required": true,
+        "min": 0,
+        "max": 30,
+        "valueType": "chatHistory",
+        "value": 0,
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "userChatInput",
+        "type": "target",
+        "label": "apps.templates.userChatInput.User question",
+        "required": true,
+        "valueType": "string",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      },
+      {
+        "key": "agents",
+        "type": "custom",
+        "valueType": "any",
+        "label": "",
+        "value": [
+          {
+            "value": "其他问题",
+            "key": "wqre"
+          },
+          {
+            "value": "景点详情查询",
+            "key": "sdfa"
+          },
+          {
+            "value": "城市景点推荐",
+            "key": "agex"
+          },
+          {
+            "value": "旅游路线规划",
+            "key": "gnen"
+          }
+        ],
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "wqre",
+        "label": "",
+        "type": "hidden",
+        "targets": [
+          {
+            "moduleId": "pht3uv",
+            "key": "switch"
+          }
+        ]
+      },
+      {
+        "key": "sdfa",
+        "label": "",
+        "type": "hidden",
+        "targets": [
+          {
+            "moduleId": "z7tp6o",
+            "key": "switch"
+          }
+        ]
+      },
+      {
+        "key": "agex",
+        "label": "",
+        "type": "hidden",
+        "targets": [
+          {
+            "moduleId": "bbs3eh",
+            "key": "switch"
+          }
+        ]
+      },
+      {
+        "key": "gnen",
+        "label": "",
+        "type": "hidden",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "yeovv8",
+    "name": "文本内容提取",
+    "avatar": "/imgs/module/extract.svg",
+    "flowType": "contentExtract",
+    "showStatus": true,
+    "position": {
+      "x": 1441.3100128997587,
+      "y": 2391.0096926750425
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "model",
+        "type": "selectExtractModel",
+        "valueType": "string",
+        "label": "core.module.flow.Extraction Model",
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "ep-20250213141319-tbks4",
+        "connected": false
+      },
+      {
+        "key": "description",
+        "type": "textarea",
+        "valueType": "string",
+        "label": "chat.response.module extract description",
+        "description": "core.module.flow.Give the AI some corresponding background knowledge or description of the requirements tips",
+        "required": true,
+        "placeholder": "core.module.flow.You re a lab appointment assistant placeholder",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "value": "## 角色\n\n你是JSON数据提取工具，负责从结构化数据中提取指定字段。\n\n## 任务\n\n从输入内容中提取关键信息并直接输出，根据意图类型决定提取哪些字段。\n\n## 输入说明\n\n输入内容是一个字符串化的JSON对象，可能有以下两种格式：\n\n**格式1：非旅游路线规划**\n```json\n{\n  \"意图\": \"景点详情查询|城市景点推荐|其他问题\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"地点信息或错误说明\"\n}\n```\n\n**格式2：旅游路线规划**\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"地点信息或错误说明\",\n  \"出行方式\": \"自驾|骑行|步行|公共交通\"\n}\n```\n\n## 处理步骤\n\n1. 解析输入内容字符串为JSON对象\n2. 读取 `意图` 字段判断类型\n3. **如果意图是\"旅游路线规划\"**：\n   - 提取 `提取结果` 和 `出行方式` 两个字段\n   - 按格式输出：`提取结果,出行方式`\n4. **如果意图不是\"旅游路线规划\"**：\n   - 只提取 `提取结果` 字段\n   - 直接输出该字段的值\n\n## 输出格式\n\n### 非旅游路线规划\n**直接输出提取结果的值**\n\n### 旅游路线规划\n**输出格式：`提取结果,出行方式`**\n- 两个字段用英文逗号分隔\n- 不要添加任何额外空格、引号或其他格式\n\n## 示例\n\n**示例1：景点详情查询**\n- 输入内容：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"郑州方特怎么样？\",\n  \"提取结果\": \"郑州方特\"\n}\n```\n- 输出：`郑州方特`\n\n**示例2：城市景点推荐**\n- 输入内容：\n```json\n{\n  \"意图\": \"城市景点推荐\",\n  \"原始文本\": \"开封有什么好玩的？\",\n  \"提取结果\": \"开封\"\n}\n```\n- 输出：`开封`\n\n**示例3：旅游路线规划（默认自驾）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京到上海三日游怎么安排？\",\n  \"提取结果\": \"北京,上海\",\n  \"出行方式\": \"自驾\"\n}\n```\n- 输出：`北京,上海,自驾`\n\n**示例4：旅游路线规划（公共交通）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"我想坐高铁从郑州到西安玩，怎么规划路线？\",\n  \"提取结果\": \"郑州,西安\",\n  \"出行方式\": \"公共交通\"\n}\n```\n- 输出：`郑州,西安,公共交通`\n\n**示例5：旅游路线规划（骑行）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"骑自行车从杭州西湖到灵隐寺怎么走？\",\n  \"提取结果\": \"杭州西湖,灵隐寺\",\n  \"出行方式\": \"骑行\"\n}\n```\n- 输出：`杭州西湖,灵隐寺,骑行`\n\n**示例6：旅游路线规划（步行）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从天安门走到故宫要多久？\",\n  \"提取结果\": \"天安门,故宫\",\n  \"出行方式\": \"步行\"\n}\n```\n- 输出：`天安门,故宫,步行`\n\n**示例7：旅游路线规划地点不足**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"我想去郑州玩\",\n  \"提取结果\": \"地点信息不足，旅游路线规划需要2个地点（起点和终点）\",\n  \"出行方式\": \"自驾\"\n}\n```\n- 输出：`地点信息不足，旅游路线规划需要2个地点（起点和终点）,自驾`\n\n**示例8：其他问题**\n- 输入内容：\n```json\n{\n  \"意图\": \"其他问题\",\n  \"原始文本\": \"你好\",\n  \"提取结果\": \"与旅游无关或无法理解\"\n}\n```\n- 输出：`与旅游无关或无法理解`\n\n## 注意事项\n\n- 根据意图类型决定输出格式\n- 旅游路线规划必须输出：`提取结果,出行方式`\n- 其他意图只输出：`提取结果`\n- 不要添加引号、解释、空格或任何其他内容\n- 字段之间使用英文逗号分隔，不加空格\n\n## 严格限制\n- 意图为城市景点推荐和景点详情查询时，提取地点结果parseResult绝不允许空输出，否则自动重试3次重新提取\n- 意图为旅游路线规划时，提取地点结果parseResult必须是两个词，否则自动重试3次重新提取\n- 意图为旅游路线规划时，出行方式travel_model绝不允许空输出，否则自动重试3次重新提取",
+        "connected": false
+      },
+      {
+        "key": "history",
+        "type": "numberInput",
+        "label": "apps.templates.userChatInput.Chat history",
+        "required": true,
+        "min": 0,
+        "max": 30,
+        "valueType": "chatHistory",
+        "value": 0,
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "content",
+        "type": "target",
+        "label": "core.module.flow.Text to be extracted",
+        "required": true,
+        "valueType": "string",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      },
+      {
+        "key": "extractKeys",
+        "type": "custom",
+        "label": "core.module.flow.Target field",
+        "valueType": "any",
+        "description": "core.module.flow.Target field description",
+        "value": [
+          {
+            "desc": "提取地点结果",
+            "key": "parseResult",
+            "required": true,
+            "enum": ""
+          },
+          {
+            "desc": "出行方式",
+            "key": "travel_model",
+            "required": false,
+            "enum": "自驾\n骑行\n步行\n公共交通"
+          }
+        ],
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "success",
+        "label": "core.module.flow.Fields are fully extracted",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "failed",
+        "label": "core.module.flow.Extracted fields are missing",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "fields",
+        "label": "core.module.flow.Complete extraction results",
+        "description": "core.module.flow.Complete extraction results description",
+        "valueType": "string",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "parseResult",
+        "label": "提取结果-提取地点结果",
+        "description": "无法提取时不会返回",
+        "valueType": "string",
+        "type": "source",
+        "targets": [
+          {
+            "moduleId": "bbs3eh",
+            "key": "cityName"
+          },
+          {
+            "moduleId": "z7tp6o",
+            "key": "cityName"
+          }
+        ]
+      },
+      {
+        "key": "travel_model",
+        "label": "提取结果-出行方式",
+        "description": "无法提取时不会返回",
+        "valueType": "string",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "z7tp6o",
+    "name": "景点详情查询",
+    "avatar": "/imgs/module/http.svg",
+    "flowType": "httpRequest",
+    "showStatus": true,
+    "position": {
+      "x": 2515.1643211414516,
+      "y": 1465.473428098605
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      },
+      {
+        "key": "system_httpMethod",
+        "type": "custom",
+        "valueType": "string",
+        "label": "",
+        "value": "GET",
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpReqUrl",
+        "type": "hidden",
+        "valueType": "string",
+        "label": "",
+        "description": "core.module.input.description.Http Request Url",
+        "placeholder": "https://api.ai.com/getInventory",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "http://www.atopes.xyz:4399/spots/detail",
+        "connected": false
+      },
+      {
+        "key": "system_httpHeader",
+        "type": "custom",
+        "valueType": "any",
+        "value": [],
+        "label": "",
+        "description": "core.module.input.description.Http Request Header",
+        "placeholder": "core.module.input.description.Http Request Header",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpParams",
+        "type": "hidden",
+        "valueType": "any",
+        "value": [
+          {
+            "key": "keyword",
+            "type": "string",
+            "value": "{{cityName}}"
+          }
+        ],
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpJsonBody",
+        "type": "hidden",
+        "valueType": "any",
+        "value": "",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "DYNAMIC_INPUT_KEY",
+        "type": "target",
+        "valueType": "any",
+        "label": "core.module.inputType.dynamicTargetInput",
+        "description": "core.module.input.description.dynamic input",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": true,
+        "hideInApp": true,
+        "connected": false
+      },
+      {
+        "valueType": "string",
+        "label": "cityName",
+        "type": "target",
+        "required": true,
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "key": "cityName",
+        "connected": true
+      },
+      {
+        "key": "system_addInputParam",
+        "type": "addInputParam",
+        "valueType": "any",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "inputType": "target",
+          "valueType": "string",
+          "required": true
+        },
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "system_addOutputParam",
+        "type": "addOutputParam",
+        "valueType": "any",
+        "label": "",
+        "targets": [],
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "outputType": "source",
+          "valueType": "string"
+        }
+      },
+      {
+        "type": "source",
+        "valueType": "string",
+        "key": "comments",
+        "label": "评论内容",
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "targets": [
+          {
+            "moduleId": "z556rq",
+            "key": "text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "moduleId": "bbs3eh",
+    "name": "城市景点推荐",
+    "avatar": "/imgs/module/http.svg",
+    "flowType": "httpRequest",
+    "showStatus": true,
+    "position": {
+      "x": 2512.8962754516347,
+      "y": 2429.8211766728255
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      },
+      {
+        "key": "system_httpMethod",
+        "type": "custom",
+        "valueType": "string",
+        "label": "",
+        "value": "GET",
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpReqUrl",
+        "type": "hidden",
+        "valueType": "string",
+        "label": "",
+        "description": "core.module.input.description.Http Request Url",
+        "placeholder": "https://api.ai.com/getInventory",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "http://www.atopes.xyz:4399/spots/recommend",
+        "connected": false
+      },
+      {
+        "key": "system_httpHeader",
+        "type": "custom",
+        "valueType": "any",
+        "value": [],
+        "label": "",
+        "description": "core.module.input.description.Http Request Header",
+        "placeholder": "core.module.input.description.Http Request Header",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpParams",
+        "type": "hidden",
+        "valueType": "any",
+        "value": [
+          {
+            "key": "cityName",
+            "type": "string",
+            "value": "{{cityName}}"
+          },
+          {
+            "key": "count",
+            "type": "string",
+            "value": "10"
+          }
+        ],
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpJsonBody",
+        "type": "hidden",
+        "valueType": "any",
+        "value": "",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "DYNAMIC_INPUT_KEY",
+        "type": "target",
+        "valueType": "any",
+        "label": "core.module.inputType.dynamicTargetInput",
+        "description": "core.module.input.description.dynamic input",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": true,
+        "hideInApp": true,
+        "connected": false
+      },
+      {
+        "key": "cityName",
+        "valueType": "string",
+        "label": "cityName",
+        "type": "target",
+        "required": true,
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "connected": true
+      },
+      {
+        "key": "system_addInputParam",
+        "type": "addInputParam",
+        "valueType": "any",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "inputType": "target",
+          "valueType": "string",
+          "required": true
+        },
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "system_addOutputParam",
+        "type": "addOutputParam",
+        "valueType": "any",
+        "label": "",
+        "targets": [],
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "outputType": "source",
+          "valueType": "string"
+        }
+      },
+      {
+        "type": "source",
+        "valueType": "string",
+        "key": "spots",
+        "label": "景点",
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "targets": [
+          {
+            "moduleId": "9lxdsg",
+            "key": "text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "moduleId": "z556rq",
+    "name": "apps.templates.cq.Designated reply",
+    "avatar": "/imgs/module/reply.svg",
+    "flowType": "answerNode",
+    "position": {
+      "x": 3705.382738227968,
+      "y": 1590.1451543822407
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "text",
+        "type": "textarea",
+        "valueType": "any",
+        "label": "apps.templates.cq.Response content",
+        "description": "apps.templates.cq.Response content description",
+        "placeholder": "apps.templates.cq.Response content description",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "value": "",
+        "connected": true
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "9lxdsg",
+    "name": "apps.templates.cq.Designated reply",
+    "avatar": "/imgs/module/reply.svg",
+    "flowType": "answerNode",
+    "position": {
+      "x": 3711.509129454619,
+      "y": 2495.697614688331
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "text",
+        "type": "textarea",
+        "valueType": "any",
+        "label": "apps.templates.cq.Response content",
+        "description": "apps.templates.cq.Response content description",
+        "placeholder": "apps.templates.cq.Response content description",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "1yg05h",
+    "name": "apps.templates.cq.Designated reply",
+    "avatar": "/imgs/module/reply.svg",
+    "flowType": "answerNode",
+    "position": {
+      "x": 3710.256490197567,
+      "y": 3224.818565158703
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "text",
+        "type": "textarea",
+        "valueType": "any",
+        "label": "apps.templates.cq.Response content",
+        "description": "apps.templates.cq.Response content description",
+        "placeholder": "apps.templates.cq.Response content description",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      }
+    ],
+    "outputs": [
       {
         "key": "finish",
         "label": "apps.templates.userChatInput.Running done",

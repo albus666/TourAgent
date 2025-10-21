@@ -1,9 +1,10 @@
 import json
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 import os
 from moudle.ctrip import CtripAPIHandler
+from moudle.mcp.mcp_api import BaiduMapAPI
 
 
 # 配置日志
@@ -12,12 +13,15 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="旅游规划助手API",
-    description="提供城市景点推荐和详情查询服务",
-    version="2.0.0"
+    description="提供城市景点推荐、详情查询和地理编码服务",
+    version="2.1.0"
 )
 
 # 初始化携程API处理器
 ctrip_handler = CtripAPIHandler()
+
+# 初始化百度地图API处理器
+baidu_map_api = BaiduMapAPI()
 
 # # @app.get("/weather")
 # # def get_weather(cityNames: str):
@@ -182,6 +186,87 @@ def get_setting():
     except Exception as e:
         logger.error(f"读取配置文件失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"读取配置文件失败: {str(e)}")
+
+
+@app.get("/geocode")
+async def geocode_cities(
+    cities: str = Query(..., description="城市名称，多个城市用逗号分隔，例如：北京,上海"),
+    max_retries: int = Query(3, ge=1, le=5, description="最大重试次数（1-5）"),
+    retry_delay: float = Query(1.0, ge=0.1, le=5.0, description="重试延迟时间（秒）")
+):
+    """
+    地理编码接口 - 将城市名称转换为经纬度坐标
+    
+    Args:
+        cities: 城市名称字符串，多个城市用逗号分隔（例如："北京" 或 "北京,上海" 或 "北京,上海,广州"）
+        max_retries: 最大重试次数，默认3次
+        retry_delay: 重试延迟时间（秒），默认1秒
+        
+    Returns:
+        JSONResponse: 动态结构，根据城市数量生成对应的字段
+        
+    Example:
+        单个城市:
+        GET /geocode?cities=北京
+        返回: {"success": true, "location": {"city1_lng": 116.40717, "city1_lat": 39.90469}}
+        
+        多个城市:
+        GET /geocode?cities=北京,上海
+        返回: {"success": true, "location": {"city1_lng": 116.40717, "city1_lat": 39.90469, "city2_lng": 121.4737, "city2_lat": 31.23037}}
+    """
+    try:
+        # 分割城市名称（去除空格）
+        city_list = [city.strip() for city in cities.split(',') if city.strip()]
+        
+        if not city_list:
+            raise HTTPException(status_code=400, detail="城市参数不能为空")
+        
+        logger.info(f"开始地理编码: {city_list}")
+        
+        # 构建动态的 location 字典
+        location = {}
+        failed_cities = []
+        
+        for i, city in enumerate(city_list, start=1):
+            logger.info(f"正在编码城市 {i}: {city}")
+            
+            # 调用地理编码API
+            result = baidu_map_api.geocode(
+                address=city,
+                max_retries=max_retries,
+                retry_delay=retry_delay
+            )
+            
+            if result:
+                # 动态添加 city1_lng, city1_lat, city2_lng, city2_lat...
+                location[f"city{i}_lng"] = result['lng']
+                location[f"city{i}_lat"] = result['lat']
+            else:
+                failed_cities.append(city)
+                # 失败时也添加字段，但值为 None
+                location[f"city{i}_lng"] = None
+                location[f"city{i}_lat"] = None
+        
+        # 判断是否全部成功
+        success = len(failed_cities) == 0
+        
+        logger.info(f"地理编码完成: 成功 {len(city_list) - len(failed_cities)}/{len(city_list)}")
+        
+        response_data = {
+            "success": success,
+            "location": location
+        }
+        
+        # 如果有失败的城市，添加错误信息
+        if failed_cities:
+            response_data["failed_cities"] = failed_cities
+            response_data["message"] = f"部分城市编码失败: {', '.join(failed_cities)}"
+        
+        return JSONResponse(content=response_data)
+        
+    except Exception as e:
+        logger.error(f"地理编码时发生错误: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"地理编码失败: {str(e)}")
 
 
 if __name__ == "__main__":

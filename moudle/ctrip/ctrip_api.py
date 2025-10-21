@@ -317,34 +317,34 @@ class CtripAPIHandler:
 if __name__ == '__main__':
     """测试携程API处理器"""
     handler = CtripAPIHandler()
-    
-    print("=" * 80)
-    print("测试 1: 城市景点推荐 - get_city_spots()")
-    print("=" * 80)
+    #
+    # print("=" * 80)
+    # print("测试 1: 城市景点推荐 - get_city_spots()")
+    # print("=" * 80)
+    # try:
+    #     spots = handler.get_city_spots("北京", count=5)
+    #     print(f"\n✓ 成功获取北京景点推荐，共 {len(spots)} 个景点")
+    #     for i, spot in enumerate(spots, 1):
+    #         # spot 本身就是 card 对象
+    #         print(f"\n景点 {i}:")
+    #         print(f"  名称: {spot.get('poiName', 'N/A')}")
+    #         print(f"  ID: {spot.get('poiId', 'N/A')}")
+    #         print(f"  评分: {spot.get('commentScore', 'N/A')} 分")
+    #         print(f"  评论数: {spot.get('commentCount', 'N/A')}")
+    #         print(f"  区域: {spot.get('zoneName', 'N/A')}")
+    #         print(f"  距离: {spot.get('distanceStr', 'N/A')}")
+    #         # 打印特色标签
+    #         features = spot.get('shortFeatures', [])
+    #         if features:
+    #             print(f"  特色: {', '.join(features)}")
+    # except Exception as e:
+    #     print(f"\n✗ 测试失败: {e}")
+    #
+    # print("\n" + "=" * 80)
+    # print("测试 2: 景点详情查询 - get_spot_detail()")
+    # print("=" * 80)
     try:
-        spots = handler.get_city_spots("北京", count=5)
-        print(f"\n✓ 成功获取北京景点推荐，共 {len(spots)} 个景点")
-        for i, spot in enumerate(spots, 1):
-            # spot 本身就是 card 对象
-            print(f"\n景点 {i}:")
-            print(f"  名称: {spot.get('poiName', 'N/A')}")
-            print(f"  ID: {spot.get('poiId', 'N/A')}")
-            print(f"  评分: {spot.get('commentScore', 'N/A')} 分")
-            print(f"  评论数: {spot.get('commentCount', 'N/A')}")
-            print(f"  区域: {spot.get('zoneName', 'N/A')}")
-            print(f"  距离: {spot.get('distanceStr', 'N/A')}")
-            # 打印特色标签
-            features = spot.get('shortFeatures', [])
-            if features:
-                print(f"  特色: {', '.join(features)}")
-    except Exception as e:
-        print(f"\n✗ 测试失败: {e}")
-
-    print("\n" + "=" * 80)
-    print("测试 2: 景点详情查询 - get_spot_detail()")
-    print("=" * 80)
-    try:
-        detail = handler.get_spot_detail("故宫")
+        detail = handler.get_spot_detail("上海迪士尼")
         print(f"\n✓ 成功获取景点详情")
         print(f"  关键词: {detail['keyword']}")
         print(f"  POI ID: {detail['poiId']}")
