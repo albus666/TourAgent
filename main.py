@@ -1,13 +1,10 @@
 import json
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
 import logging
 import os
-import jinja2
-import requests
 from moudle.ctrip import CtripAPIHandler
 from moudle.mcp.mcp_api import BaiduMapAPI
-
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -25,13 +22,6 @@ ctrip_handler = CtripAPIHandler()
 # 初始化百度地图API处理器
 baidu_map_api = BaiduMapAPI()
 
-# 设置Jinja2环境
-template_dir = os.path.join(os.path.dirname(__file__), "templates")
-os.makedirs(template_dir, exist_ok=True)  # 确保目录存在
-jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(template_dir),
-    autoescape=False  # Markdown 不需要转义
-)
 
 # # @app.get("/weather")
 # # def get_weather(cityNames: str):
@@ -50,10 +40,10 @@ async def get_city_spots_endpoint(cityName: str, count: int = 10):
     """
     try:
         logger.info(f"开始查询城市景点: {cityName}, 数量: {count}")
-        
+
         # 获取城市景点推荐
         spots = ctrip_handler.get_city_spots(cityName, count)
-        
+
         if not spots:
             return JSONResponse(
                 content={
@@ -64,7 +54,7 @@ async def get_city_spots_endpoint(cityName: str, count: int = 10):
                     "message": f"未找到{cityName}的景点信息"
                 }
             )
-        
+
         # 格式化返回数据
         formatted_spots = []
         for spot in spots:
@@ -82,9 +72,9 @@ async def get_city_spots_endpoint(cityName: str, count: int = 10):
                 "priceTypeDesc": spot.get("priceTypeDesc"),
                 "detailUrl": spot.get("detailUrl")
             })
-        
+
         logger.info(f"成功获取{len(formatted_spots)}个景点")
-        
+
         return JSONResponse(
             content={
                 "success": True,
@@ -93,7 +83,7 @@ async def get_city_spots_endpoint(cityName: str, count: int = 10):
                 "spots": formatted_spots
             }
         )
-        
+
     except Exception as e:
         logger.error(f"查询城市景点时发生错误: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"查询失败: {str(e)}")
@@ -112,10 +102,10 @@ async def get_spot_detail_endpoint(keyword: str):
     """
     try:
         logger.info(f"开始查询景点详情: {keyword}")
-        
+
         # 获取景点详情
         detail = ctrip_handler.get_spot_detail(keyword)
-        
+
         if not detail:
             return JSONResponse(
                 content={
@@ -124,7 +114,7 @@ async def get_spot_detail_endpoint(keyword: str):
                     "message": "未找到景点信息"
                 }
             )
-        
+
         # 格式化评论数据
         formatted_comments = []
         for comment in detail.get("comments", []):
@@ -137,9 +127,9 @@ async def get_spot_detail_endpoint(keyword: str):
                 "ipLocatedName": comment.get("ipLocatedName"),
                 "imageUrl": comment.get("imageUrl")
             })
-        
+
         logger.info(f"成功获取景点详情，评论数: {detail.get('commentCount', 0)}")
-        
+
         response_data = {
             "success": True,
             "keyword": detail.get("keyword"),
@@ -147,13 +137,13 @@ async def get_spot_detail_endpoint(keyword: str):
             "commentCount": detail.get("commentCount"),
             "comments": formatted_comments
         }
-        
+
         # 如果有错误信息，也包含进去
         if "error" in detail:
             response_data["warning"] = detail["error"]
-        
+
         return JSONResponse(content=response_data)
-        
+
     except Exception as e:
         logger.error(f"查询景点详情时发生错误: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"查询失败: {str(e)}")
@@ -172,7 +162,7 @@ def get_setting():
         json_path = os.path.join(os.path.dirname(__file__), "dataset", "旅游规划助手.json")
         with open(json_path, 'r', encoding='utf-8') as f:
             content = f.read()
-           
+
         # 尝试解析JSON
         try:
             data = json.loads(content)
@@ -191,108 +181,37 @@ def get_setting():
                 "inputs": [],
                 "outputs": []
             }]
-           
+
         return JSONResponse(content=data)
     except Exception as e:
         logger.error(f"读取配置文件失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"读取配置文件失败: {str(e)}")
 
+
 @app.get("/test")
 def test():
     """
-    测试接口 - 使用 Jinja2 文件模板渲染图片信息
-    
-    采用专业的模板文件方式：
-    1. 模板存储在 templates/test.jinja2 文件中
-    2. 模板和代码逻辑分离，易于维护
-    3. 可以直接修改模板文件而无需改动代码
-    
-    图片显示方式：
-    - 方式1：直接使用无防盗链的图床（如 Bing）
-    - 方式2：使用 /image-proxy 接口代理有防盗链的图片
+    测试接口 - 返回图片信息
     """
-    try:
-        # 原始 Gitee 图片链接（有防盗链）
-        gitee_image = "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
-        
-        # 准备数据
-        attraction_data = {
-            "name": "测试景点",
-            # 方式1：直接使用 Bing 图片（无防盗链）
-            "image_url": "https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525?rik=C0D21hJDYvXosw&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fwallpaper%2f1305%2f16%2fc4%2f20990657_1368686545122.jpg&ehk=netN2qzcCVS4ALUQfDOwxAwFcy41oxC%2b0xTFvOYy5ds%3d&risl=&pid=ImgRaw&r=0",
-            # 方式2：使用代理接口绕过 Gitee 防盗链
-            "wordcloud_url": f"http://localhost:4399/image-proxy?url={gitee_image}",
-            "score": 4.8
-        }
-        
-        # 从文件加载模板并渲染
-        template = jinja_env.get_template("test.jinja2")
-        rendered_text = template.render(attraction=attraction_data)
-        
-        return JSONResponse(
-            content={
-                "success": True,
-                "text": rendered_text,
-                "raw_data": attraction_data,
-                "tips": {
-                    "gitee_original": gitee_image,
-                    "gitee_proxied": f"http://localhost:4399/image-proxy?url={gitee_image}",
-                    "solution": "使用 /image-proxy 接口可以绕过防盗链限制"
-                }
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": "测试图片",
+            "test": {
+                "bing_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+                "bing_markdown": "![test](https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525?rik=C0D21hJDYvXosw&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fwallpaper%2f1305%2f16%2fc4%2f20990657_1368686545122.jpg&ehk=netN2qzcCVS4ALUQfDOwxAwFcy41oxC%2b0xTFvOYy5ds%3d&risl=&pid=ImgRaw&r=0)",
+                "gitee_url":"https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+                "gitee_markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)"
             }
-        )
-    except Exception as e:
-        logger.error(f"渲染模板失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"渲染模板失败: {str(e)}")
-
-
-@app.get("/image-proxy")
-async def image_proxy(url: str):
-    """
-    图片代理接口 - 解决防盗链问题
-    
-    通过服务器转发图片请求，绕过 Referer 检查
-    
-    Args:
-        url: 图片的原始URL
-        
-    Returns:
-        StreamingResponse: 图片数据流
-        
-    Example:
-        原图片URL: https://gitee.com/.../test.jpg
-        代理后: http://localhost:4399/image-proxy?url=https://gitee.com/.../test.jpg
-    """
-    try:
-        # 请求原始图片，不带 Referer 或使用合适的 headers
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            # 不设置 Referer，或设置为 Gitee 本身
-            'Referer': 'https://gitee.com/'
         }
-        
-        response = requests.get(url, headers=headers, stream=True, timeout=10)
-        response.raise_for_status()
-        
-        # 获取图片类型
-        content_type = response.headers.get('Content-Type', 'image/jpeg')
-        
-        # 返回图片流
-        return StreamingResponse(
-            response.iter_content(chunk_size=8192),
-            media_type=content_type
-        )
-        
-    except Exception as e:
-        logger.error(f"代理图片失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"获取图片失败: {str(e)}")
+    )
 
 
 @app.get("/geocode")
 async def geocode_cities(
-    cities: str = Query(..., description="城市名称，多个城市用逗号分隔，例如：北京,上海"),
-    max_retries: int = Query(3, ge=1, le=5, description="最大重试次数（1-5）"),
-    retry_delay: float = Query(1.0, ge=0.1, le=5.0, description="重试延迟时间（秒）")
+        cities: str = Query(..., description="城市名称，多个城市用逗号分隔，例如：北京,上海"),
+        max_retries: int = Query(3, ge=1, le=5, description="最大重试次数（1-5）"),
+        retry_delay: float = Query(1.0, ge=0.1, le=5.0, description="重试延迟时间（秒）")
 ):
     """
     地理编码接口 - 将城市名称转换为经纬度坐标
@@ -317,26 +236,26 @@ async def geocode_cities(
     try:
         # 分割城市名称（去除空格）
         city_list = [city.strip() for city in cities.split(',') if city.strip()]
-        
+
         if not city_list:
             raise HTTPException(status_code=400, detail="城市参数不能为空")
-        
+
         logger.info(f"开始地理编码: {city_list}")
-        
+
         # 构建动态的 location 字典
         location = {}
         failed_cities = []
-        
+
         for i, city in enumerate(city_list, start=1):
             logger.info(f"正在编码城市 {i}: {city}")
-            
+
             # 调用地理编码API
             result = baidu_map_api.geocode(
                 address=city,
                 max_retries=max_retries,
                 retry_delay=retry_delay
             )
-            
+
             if result:
                 # 动态添加 city1_lng, city1_lat, city2_lng, city2_lat...
                 location[f"city{i}_lng"] = result['lng']
@@ -346,24 +265,24 @@ async def geocode_cities(
                 # 失败时也添加字段，但值为 None
                 location[f"city{i}_lng"] = None
                 location[f"city{i}_lat"] = None
-        
+
         # 判断是否全部成功
         success = len(failed_cities) == 0
-        
+
         logger.info(f"地理编码完成: 成功 {len(city_list) - len(failed_cities)}/{len(city_list)}")
-        
+
         response_data = {
             "success": success,
             "location": location
         }
-        
+
         # 如果有失败的城市，添加错误信息
         if failed_cities:
             response_data["failed_cities"] = failed_cities
             response_data["message"] = f"部分城市编码失败: {', '.join(failed_cities)}"
-        
+
         return JSONResponse(content=response_data)
-        
+
     except Exception as e:
         logger.error(f"地理编码时发生错误: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"地理编码失败: {str(e)}")
