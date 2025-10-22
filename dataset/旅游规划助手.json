@@ -16,7 +16,7 @@
         "label": "apps.templates.basicChat.Opening statement",
         "showTargetInApp": false,
         "showTargetInPlugin": false,
-        "value": "你好呀！👋 我是你的**智能旅游规划助手**！\n\\n\n\n🌍 **我能做什么？**\n我直连**携程旅游数据库**，实时为你获取国内外热门景点信息，让你的旅行规划更轻松：\n\\n\n\n✨ **景点详情查询** - 想知道某个景点怎么样？我给你详细介绍、评分、游客评价  \n🗺️ **城市景点推荐** - 告诉我你想去哪个城市，我帮你找出最值得去的景点  \n📋 **旅游路线规划** - 根据你的偏好，为你量身定制旅行计划\n\\n\n\n💬 **怎么问我？**\n   - 开封有什么好玩的景点？\n   - 清明上河园怎么样？]\n   - 帮我规划一下郑州去上海的三日游\n\n快来开启你的精彩旅程吧！🚀",
+        "value": "你好呀！👋 我是你的**智能旅游规划助手**！\n\\n\n\n🌍 **我能做什么？**\n我直连**携程旅游数据库**，实时为你获取国内外热门景点信息，让你的旅行规划更轻松：\n\\n\n\n✨ **景点详情查询** - 想知道某个景点怎么样？我给你详细介绍、评分、游客评价  \n🗺️ **城市景点推荐** - 告诉我你想去哪个城市，我帮你找出最值得去的景点  \n📋 **旅游路线规划** - 根据你的偏好，为你量身定制旅行计划\n   - 需要提供**起点和终点**两个地点\n   - 支持四种出行方式：🚗自驾、🚴骑行、🚶步行、🚌公共交通（默认自驾）\n\n💬 **怎么问我？**\n   - 开封有什么好玩的景点？\n   - 清明上河园怎么样？\n   - 帮我规划一下郑州去上海的三日游\n   - 从北京到西安骑行路线推荐\n\n快来开启你的精彩旅程吧！🚀",
         "connected": false
       },
       {
@@ -214,7 +214,7 @@
         "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "value": "## 角色\n\n你是用户输入文本预处理工具，负责验证和提取用户输入中的关键信息，严格按照规则执行。\n\n## 处理流程\n\n### 第一步：旅游相关性判断\n- 判断用户输入是否与旅游相关\n- 以下情况判定为 `其他问题`：\n  - 日常闲聊、问候（如\"你好\"、\"谢谢\"）\n  - 系统宣传语、引导语\n  - 与旅游无关的话题\n  - 无法理解的输入\n- 如果是旅游相关内容 → 进入第二步\n\n### 第二步：意图识别\n分析用户输入，判断属于以下哪种服务类型：\n\n**服务类型说明：**\n- **景点详情查询**：用户想了解某个具体景点的信息（评价、介绍、门票等）\n- **城市景点推荐**：用户想知道某个城市有哪些值得去的景点\n- **旅游路线规划**：用户想规划从一个地点到另一个地点的旅游路线\n\n**判断技巧：**\n- 提到具体景点名称 + 询问详情 → 景点详情查询\n- 提到城市名 + 询问推荐/有什么好玩的 → 城市景点推荐\n- 提到两个地点 + 路线/行程规划 → 旅游路线规划\n\n识别意图后 → 进入第三步\n\n### 第三步：信息提取\n\n#### 3.1 地点提取\n从用户输入中提取地点名称（城市名或景点名）：\n\n**提取要求：**\n1. **景点详情查询**：至少提取 1 个地点（景点名）\n2. **城市景点推荐**：至少提取 1 个地点（城市名）\n3. **旅游路线规划**：必须提取 2 个地点（起点、终点），按\"起点,终点\"顺序输出\n\n**提取规则：**\n- 保留地点名称的完整性，不可过度分割\n- 多个地点用英文逗号分隔：`地点1,地点2`\n- 景点名称视为地点\n- 如果地点数量不足 → 在提取结果字段中说明错误\n\n#### 3.2 出行方式提取（仅针对旅游路线规划）\n当意图为\"旅游路线规划\"时，需要识别用户的出行方式：\n\n**支持的出行方式：**\n- **自驾**：开车、自驾、驾车等\n- **骑行**：骑车、骑行、自行车等\n- **步行**：走路、步行、徒步等\n- **公共交通**：坐车、公交、地铁、公共交通、高铁、火车等\n\n**识别规则：**\n- 从用户输入中提取明确的出行方式关键词\n- 如果用户未明确说明出行方式，默认为：`自驾`\n- 只返回四种标准出行方式之一：`自驾`、`骑行`、`步行`、`公共交通`\n\n## 输出格式\n\n**必须严格按照以下 JSON 格式输出，不要添加任何额外文字：**\n\n### 景点详情查询 / 城市景点推荐 / 其他问题\n```json\n{\n  \"意图\": \"景点详情查询|城市景点推荐|旅游路线规划|其他问题\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"提取的地点信息或错误说明\"\n}\n```\n\n### 旅游路线规划\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"提取的地点信息或错误说明\",\n  \"出行方式\": \"自驾|骑行|步行|公共交通\"\n}\n```\n\n**字段说明：**\n- **意图**：识别出的服务类型，四选一\n- **原始文本**：用户输入的完整文本\n- **提取结果**：\n  - 成功提取：地点名称（如 `郑州方特` 或 `郑州,上海`）\n  - 地点不足：`地点信息不足，[服务类型]需要[数量]个地点`\n  - 其他问题：`与旅游无关或无法理解`\n- **出行方式**：仅在意图为\"旅游路线规划\"时返回，四选一\n\n## 示例\n\n**示例1：景点详情查询**\n- 用户输入：郑州方特怎么样？\n- 输出：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"郑州方特怎么样？\",\n  \"提取结果\": \"郑州方特\"\n}\n```\n\n**示例2：城市景点推荐**\n- 用户输入：开封有什么好玩的？\n- 输出：\n```json\n{\n  \"意图\": \"城市景点推荐\",\n  \"原始文本\": \"开封有什么好玩的？\",\n  \"提取结果\": \"开封\"\n}\n```\n\n**示例3：旅游路线规划（默认自驾）**\n- 用户输入：从北京到上海三日游怎么安排？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京到上海三日游怎么安排？\",\n  \"提取结果\": \"北京,上海\",\n  \"出行方式\": \"自驾\"\n}\n```\n\n**示例4：旅游路线规划（明确出行方式 - 公共交通）**\n- 用户输入：我想坐高铁从郑州到西安玩，怎么规划路线？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"我想坐高铁从郑州到西安玩，怎么规划路线？\",\n  \"提取结果\": \"郑州,西安\",\n  \"出行方式\": \"公共交通\"\n}\n```\n\n**示例5：旅游路线规划（明确出行方式 - 骑行）**\n- 用户输入：骑自行车从杭州西湖到灵隐寺怎么走？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"骑自行车从杭州西湖到灵隐寺怎么走？\",\n  \"提取结果\": \"杭州西湖,灵隐寺\",\n  \"出行方式\": \"骑行\"\n}\n```\n\n**示例6：旅游路线规划（明确出行方式 - 步行）**\n- 用户输入：从天安门走到故宫要多久？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从天安门走到故宫要多久？\",\n  \"提取结果\": \"天安门,故宫\",\n  \"出行方式\": \"步行\"\n}\n```\n\n**示例7：旅游路线规划（明确出行方式 - 自驾）**\n- 用户输入：自驾从成都到九寨沟的路线推荐\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"自驾从成都到九寨沟的路线推荐\",\n  \"提取结果\": \"成都,九寨沟\",\n  \"出行方式\": \"自驾\"\n}\n```\n\n**示例8：其他问题**\n- 用户输入：你好，请介绍一下自己\n- 输出：\n```json\n{\n  \"意图\": \"其他问题\",\n  \"原始文本\": \"你好，请介绍一下自己\",\n  \"提取结果\": \"与旅游无关或无法理解\"\n}\n```\n\n**示例9：景点详情查询（多个景点）**\n- 用户输入：开封万岁山武侠城和上海迪士尼哪个好玩？\n- 输出：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"开封万岁山武侠城和上海迪士尼哪个好玩？\",\n  \"提取结果\": \"开封万岁山武侠城,上海迪士尼\"\n}\n```\n\n**示例10：路线规划地点不足**\n- 用户输入：从北京出发旅游三天\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京出发旅游三天\",\n  \"提取结果\": \"地点信息不足，旅游路线规划需要2个地点（起点和终点）\",\n  \"出行方式\": \"自驾\"\n}\n```\n\n## 注意事项\n\n- 你的输出将直接流向下一个流程，必须是有效的 JSON 格式\n- 严格按照输出格式返回结果，不要添加额外解释或markdown标记\n- 只返回 JSON 对象，不进行对话\n- 仔细分析用户意图，准确判断服务类型\n- **旅游路线规划**必须包含\"出行方式\"字段，其他意图类型不需要该字段\n- 出行方式识别优先匹配用户输入中的明确关键词，无关键词时默认返回自驾",
+        "value": "## 角色\n\n你是用户输入文本预处理工具，负责验证和提取用户输入中的关键信息，严格按照规则执行。\n\n## 处理流程\n\n### 第一步：旅游相关性判断\n- 判断用户输入是否与旅游相关\n- 以下情况判定为 `其他问题`：\n  - 日常闲聊、问候（如\"你好\"、\"谢谢\"）\n  - 系统宣传语、引导语\n  - 与旅游无关的话题\n  - 无法理解的输入\n- 如果是旅游相关内容 → 进入第二步\n\n### 第二步：意图识别\n分析用户输入，判断属于以下哪种服务类型：\n\n**服务类型说明：**\n- **景点详情查询**：用户想了解某个具体景点的信息（评价、介绍、门票等）\n- **城市景点推荐**：用户想知道某个城市有哪些值得去的景点\n- **旅游路线规划**：用户想规划从一个地点到另一个地点的旅游路线\n\n**判断技巧：**\n- 提到具体景点名称 + 询问详情 → 景点详情查询\n- 提到城市名 + 询问推荐/有什么好玩的 → 城市景点推荐\n- 提到两个地点 + 路线/行程规划 → 旅游路线规划\n\n识别意图后 → 进入第三步\n\n### 第三步：信息提取\n\n#### 3.1 地点提取\n从用户输入中提取地点名称（城市名或景点名）：\n\n**提取要求：**\n1. **景点详情查询**：至少提取 1 个地点（景点名）\n2. **城市景点推荐**：至少提取 1 个地点（城市名）\n3. **旅游路线规划**：必须提取 2 个地点（起点、终点），按\"起点,终点\"顺序输出\n\n**提取规则：**\n- 保留地点名称的完整性，不可过度分割\n- 多个地点用英文逗号分隔：`地点1,地点2`\n- 景点名称视为地点\n- 如果地点数量不足 → 在提取结果字段中说明错误\n\n#### 3.2 出行方式提取（仅针对旅游路线规划）\n当意图为\"旅游路线规划\"时，需要识别用户的出行方式：\n\n**支持的出行方式：**\n- **自驾**：开车、自驾、驾车等\n- **骑行**：骑车、骑行、自行车等\n- **步行**：走路、步行、徒步等\n- **公共交通**：坐车、公交、地铁、公共交通、高铁、火车等\n\n**识别规则：**\n- 从用户输入中提取明确的出行方式关键词\n- 如果用户未明确说明出行方式，默认为：`自驾`\n- 只返回四种标准出行方式之一：`自驾`、`骑行`、`步行`、`公共交通`\n\n## 输出格式\n\n**必须严格按照以下 JSON 格式输出，不要添加任何额外文字：**\n\n### 景点详情查询 / 城市景点推荐 / 其他问题\n```json\n{\n  \"意图\": \"景点详情查询|城市景点推荐|旅游路线规划|其他问题\",\n  \"原始文本\": \"用户的原始输入\",\n  \"parseResult\": \"提取的地点信息或错误说明\"\n}\n```\n\n### 旅游路线规划\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"用户的原始输入\",\n  \"parseResult\": \"提取的地点信息或错误说明\",\n  \"travel_model\": \"自驾|骑行|步行|公共交通\"\n}\n```\n\n**字段说明：**\n- **意图**：识别出的服务类型，四选一\n- **原始文本**：用户输入的完整文本\n- **parseResult**：\n  - 成功提取：地点名称（如 `郑州方特` 或 `郑州,上海`）\n  - 地点不足：`地点信息不足，[服务类型]需要[数量]个地点`\n  - 其他问题：`与旅游无关或无法理解`\n- **travel_model**：仅在意图为\"旅游路线规划\"时返回，四选一\n\n## 示例\n\n**示例1：景点详情查询**\n- 用户输入：郑州方特怎么样？\n- 输出：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"郑州方特怎么样？\",\n  \"parseResult\": \"郑州方特\"\n}\n```\n\n**示例2：城市景点推荐**\n- 用户输入：开封有什么好玩的？\n- 输出：\n```json\n{\n  \"意图\": \"城市景点推荐\",\n  \"原始文本\": \"开封有什么好玩的？\",\n  \"parseResult\": \"开封\"\n}\n```\n\n**示例3：旅游路线规划（默认自驾）**\n- 用户输入：从北京到上海三日游怎么安排？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京到上海三日游怎么安排？\",\n  \"parseResult\": \"北京,上海\",\n  \"travel_model\": \"自驾\"\n}\n```\n\n**示例4：旅游路线规划（明确出行方式 - 公共交通）**\n- 用户输入：我想坐高铁从郑州到西安玩，怎么规划路线？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"我想坐高铁从郑州到西安玩，怎么规划路线？\",\n  \"parseResult\": \"郑州,西安\",\n  \"travel_model\": \"公共交通\"\n}\n```\n\n**示例5：旅游路线规划（明确出行方式 - 骑行）**\n- 用户输入：骑自行车从杭州西湖到灵隐寺怎么走？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"骑自行车从杭州西湖到灵隐寺怎么走？\",\n  \"parseResult\": \"杭州西湖,灵隐寺\",\n  \"travel_model\": \"骑行\"\n}\n```\n\n**示例6：旅游路线规划（明确出行方式 - 步行）**\n- 用户输入：从天安门走到故宫要多久？\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从天安门走到故宫要多久？\",\n  \"parseResult\": \"天安门,故宫\",\n  \"travel_model\": \"步行\"\n}\n```\n\n**示例7：旅游路线规划（明确出行方式 - 自驾）**\n- 用户输入：自驾从成都到九寨沟的路线推荐\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"自驾从成都到九寨沟的路线推荐\",\n  \"parseResult\": \"成都,九寨沟\",\n  \"travel_model\": \"自驾\"\n}\n```\n\n**示例8：其他问题**\n- 用户输入：你好，请介绍一下自己\n- 输出：\n```json\n{\n  \"意图\": \"其他问题\",\n  \"原始文本\": \"你好，请介绍一下自己\",\n  \"parseResult\": \"与旅游无关或无法理解\"\n}\n```\n\n**示例9：景点详情查询（多个景点）**\n- 用户输入：开封万岁山武侠城和上海迪士尼哪个好玩？\n- 输出：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"开封万岁山武侠城和上海迪士尼哪个好玩？\",\n  \"parseResult\": \"开封万岁山武侠城,上海迪士尼\"\n}\n```\n\n**示例10：路线规划地点不足**\n- 用户输入：从北京出发旅游三天\n- 输出：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京出发旅游三天\",\n  \"parseResult\": \"地点信息不足，旅游路线规划需要2个地点（起点和终点）\",\n  \"travel_model\": \"自驾\"\n}\n```\n\n## 注意事项\n\n- 你的输出将直接流向下一个流程，必须是有效的 JSON 格式\n- 严格按照输出格式返回结果，不要添加额外解释或markdown标记\n- 只返回 JSON 对象，不进行对话\n- 仔细分析用户意图，准确判断服务类型\n- **旅游路线规划**必须包含\"travel_model\"字段，其他意图类型不需要该字段\n- 出行方式识别优先匹配用户输入中的明确关键词，无关键词时默认返回自驾",
         "connected": false
       },
       {
@@ -618,8 +618,8 @@
     "flowType": "contentExtract",
     "showStatus": true,
     "position": {
-      "x": 1441.3100128997587,
-      "y": 2391.0096926750425
+      "x": 1308.4402705246548,
+      "y": 2368.232022553596
     },
     "inputs": [
       {
@@ -652,7 +652,7 @@
         "placeholder": "core.module.flow.You re a lab appointment assistant placeholder",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "value": "## 角色\n\n你是JSON数据提取工具，负责从结构化数据中提取指定字段。\n\n## 任务\n\n从输入内容中提取关键信息并直接输出，根据意图类型决定提取哪些字段。\n\n## 输入说明\n\n输入内容是一个字符串化的JSON对象，可能有以下两种格式：\n\n**格式1：非旅游路线规划**\n```json\n{\n  \"意图\": \"景点详情查询|城市景点推荐|其他问题\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"地点信息或错误说明\"\n}\n```\n\n**格式2：旅游路线规划**\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"用户的原始输入\",\n  \"提取结果\": \"地点信息或错误说明\",\n  \"出行方式\": \"自驾|骑行|步行|公共交通\"\n}\n```\n\n## 处理步骤\n\n1. 解析输入内容字符串为JSON对象\n2. 读取 `意图` 字段判断类型\n3. **如果意图是\"旅游路线规划\"**：\n   - 提取 `提取结果` 和 `出行方式` 两个字段\n   - 按格式输出：`提取结果,出行方式`\n4. **如果意图不是\"旅游路线规划\"**：\n   - 只提取 `提取结果` 字段\n   - 直接输出该字段的值\n\n## 输出格式\n\n### 非旅游路线规划\n**直接输出提取结果的值**\n\n### 旅游路线规划\n**输出格式：`提取结果,出行方式`**\n- 两个字段用英文逗号分隔\n- 不要添加任何额外空格、引号或其他格式\n\n## 示例\n\n**示例1：景点详情查询**\n- 输入内容：\n```json\n{\n  \"意图\": \"景点详情查询\",\n  \"原始文本\": \"郑州方特怎么样？\",\n  \"提取结果\": \"郑州方特\"\n}\n```\n- 输出：`郑州方特`\n\n**示例2：城市景点推荐**\n- 输入内容：\n```json\n{\n  \"意图\": \"城市景点推荐\",\n  \"原始文本\": \"开封有什么好玩的？\",\n  \"提取结果\": \"开封\"\n}\n```\n- 输出：`开封`\n\n**示例3：旅游路线规划（默认自驾）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从北京到上海三日游怎么安排？\",\n  \"提取结果\": \"北京,上海\",\n  \"出行方式\": \"自驾\"\n}\n```\n- 输出：`北京,上海,自驾`\n\n**示例4：旅游路线规划（公共交通）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"我想坐高铁从郑州到西安玩，怎么规划路线？\",\n  \"提取结果\": \"郑州,西安\",\n  \"出行方式\": \"公共交通\"\n}\n```\n- 输出：`郑州,西安,公共交通`\n\n**示例5：旅游路线规划（骑行）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"骑自行车从杭州西湖到灵隐寺怎么走？\",\n  \"提取结果\": \"杭州西湖,灵隐寺\",\n  \"出行方式\": \"骑行\"\n}\n```\n- 输出：`杭州西湖,灵隐寺,骑行`\n\n**示例6：旅游路线规划（步行）**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"从天安门走到故宫要多久？\",\n  \"提取结果\": \"天安门,故宫\",\n  \"出行方式\": \"步行\"\n}\n```\n- 输出：`天安门,故宫,步行`\n\n**示例7：旅游路线规划地点不足**\n- 输入内容：\n```json\n{\n  \"意图\": \"旅游路线规划\",\n  \"原始文本\": \"我想去郑州玩\",\n  \"提取结果\": \"地点信息不足，旅游路线规划需要2个地点（起点和终点）\",\n  \"出行方式\": \"自驾\"\n}\n```\n- 输出：`地点信息不足，旅游路线规划需要2个地点（起点和终点）,自驾`\n\n**示例8：其他问题**\n- 输入内容：\n```json\n{\n  \"意图\": \"其他问题\",\n  \"原始文本\": \"你好\",\n  \"提取结果\": \"与旅游无关或无法理解\"\n}\n```\n- 输出：`与旅游无关或无法理解`\n\n## 注意事项\n\n- 根据意图类型决定输出格式\n- 旅游路线规划必须输出：`提取结果,出行方式`\n- 其他意图只输出：`提取结果`\n- 不要添加引号、解释、空格或任何其他内容\n- 字段之间使用英文逗号分隔，不加空格\n\n## 严格限制\n- 意图为城市景点推荐和景点详情查询时，提取地点结果parseResult绝不允许空输出，否则自动重试3次重新提取\n- 意图为旅游路线规划时，提取地点结果parseResult必须是两个词，否则自动重试3次重新提取\n- 意图为旅游路线规划时，出行方式travel_model绝不允许空输出，否则自动重试3次重新提取",
+        "value": "从输入的JSON中提取所有目标字段并输入下一流程，中间不做任何处理",
         "connected": false
       },
       {
@@ -689,7 +689,7 @@
             "desc": "提取地点结果",
             "key": "parseResult",
             "required": true,
-            "enum": ""
+            "enum": "郑州\n郑州方特乐园\n上海\n上海迪士尼"
           },
           {
             "desc": "出行方式",
@@ -740,6 +740,18 @@
           {
             "moduleId": "z7tp6o",
             "key": "cityName"
+          },
+          {
+            "moduleId": "jchve5",
+            "key": "cityNames"
+          },
+          {
+            "moduleId": "w8u72a",
+            "key": "userChatInput"
+          },
+          {
+            "moduleId": "cki1yp",
+            "key": "userChatInput"
           }
         ]
       },
@@ -760,8 +772,8 @@
     "flowType": "httpRequest",
     "showStatus": true,
     "position": {
-      "x": 2515.1643211414516,
-      "y": 1465.473428098605
+      "x": 2825.164321141451,
+      "y": 1415.473428098605
     },
     "inputs": [
       {
@@ -925,7 +937,6 @@
       {
         "type": "source",
         "valueType": "string",
-        "key": "comments",
         "label": "评论内容",
         "description": "",
         "edit": true,
@@ -940,7 +951,8 @@
             "moduleId": "z556rq",
             "key": "text"
           }
-        ]
+        ],
+        "key": "comments"
       }
     ]
   },
@@ -951,8 +963,8 @@
     "flowType": "httpRequest",
     "showStatus": true,
     "position": {
-      "x": 2512.8962754516347,
-      "y": 2429.8211766728255
+      "x": 2822.896275451634,
+      "y": 2454.8211766728255
     },
     "inputs": [
       {
@@ -1257,6 +1269,751 @@
       }
     ],
     "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "1rh057",
+    "name": "core.module.flow.HTTP Module",
+    "avatar": "/imgs/module/http.svg",
+    "flowType": "httpRequest",
+    "showStatus": true,
+    "position": {
+      "x": 2831.274031475908,
+      "y": 3547.8156675123705
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "system_httpMethod",
+        "type": "custom",
+        "valueType": "string",
+        "label": "",
+        "value": "POST",
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpReqUrl",
+        "type": "hidden",
+        "valueType": "string",
+        "label": "",
+        "description": "core.module.input.description.Http Request Url",
+        "placeholder": "https://api.ai.com/getInventory",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpHeader",
+        "type": "custom",
+        "valueType": "any",
+        "value": [],
+        "label": "",
+        "description": "core.module.input.description.Http Request Header",
+        "placeholder": "core.module.input.description.Http Request Header",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpParams",
+        "type": "hidden",
+        "valueType": "any",
+        "value": [],
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpJsonBody",
+        "type": "hidden",
+        "valueType": "any",
+        "value": "",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "DYNAMIC_INPUT_KEY",
+        "type": "target",
+        "valueType": "any",
+        "label": "core.module.inputType.dynamicTargetInput",
+        "description": "core.module.input.description.dynamic input",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": true,
+        "hideInApp": true,
+        "connected": false
+      },
+      {
+        "key": "system_addInputParam",
+        "type": "addInputParam",
+        "valueType": "any",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "inputType": "target",
+          "valueType": "string",
+          "required": true
+        },
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "system_addOutputParam",
+        "type": "addOutputParam",
+        "valueType": "any",
+        "label": "",
+        "targets": [],
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "outputType": "source",
+          "valueType": "string"
+        }
+      }
+    ]
+  },
+  {
+    "moduleId": "jchve5",
+    "name": "地理编码查询",
+    "avatar": "/imgs/module/http.svg",
+    "flowType": "httpRequest",
+    "showStatus": true,
+    "position": {
+      "x": 2239.983473792831,
+      "y": 4000.5358714090507
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "system_httpMethod",
+        "type": "custom",
+        "valueType": "string",
+        "label": "",
+        "value": "GET",
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpReqUrl",
+        "type": "hidden",
+        "valueType": "string",
+        "label": "",
+        "description": "core.module.input.description.Http Request Url",
+        "placeholder": "https://api.ai.com/getInventory",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "http://www.atopes.xyz:4399/geocode",
+        "connected": false
+      },
+      {
+        "key": "system_httpHeader",
+        "type": "custom",
+        "valueType": "any",
+        "value": [],
+        "label": "",
+        "description": "core.module.input.description.Http Request Header",
+        "placeholder": "core.module.input.description.Http Request Header",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpParams",
+        "type": "hidden",
+        "valueType": "any",
+        "value": [
+          {
+            "key": "cities",
+            "type": "string",
+            "value": "cityNames"
+          }
+        ],
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpJsonBody",
+        "type": "hidden",
+        "valueType": "any",
+        "value": "",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "DYNAMIC_INPUT_KEY",
+        "type": "target",
+        "valueType": "any",
+        "label": "core.module.inputType.dynamicTargetInput",
+        "description": "core.module.input.description.dynamic input",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": true,
+        "hideInApp": true,
+        "connected": false
+      },
+      {
+        "valueType": "string",
+        "label": "城市名",
+        "type": "target",
+        "required": true,
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "key": "cityNames",
+        "connected": true
+      },
+      {
+        "key": "system_addInputParam",
+        "type": "addInputParam",
+        "valueType": "any",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "inputType": "target",
+          "valueType": "string",
+          "required": true
+        },
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "system_addOutputParam",
+        "type": "addOutputParam",
+        "valueType": "any",
+        "label": "",
+        "targets": [],
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "outputType": "source",
+          "valueType": "string"
+        }
+      },
+      {
+        "type": "source",
+        "valueType": "string",
+        "key": "location",
+        "label": "地理编码",
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "targets": [
+          {
+            "moduleId": "6bfpoj",
+            "key": "text"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "moduleId": "6bfpoj",
+    "name": "apps.templates.cq.Designated reply",
+    "avatar": "/imgs/module/reply.svg",
+    "flowType": "answerNode",
+    "position": {
+      "x": 2908.879461322971,
+      "y": 4574.229078021206
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "text",
+        "type": "textarea",
+        "valueType": "any",
+        "label": "apps.templates.cq.Response content",
+        "description": "apps.templates.cq.Response content description",
+        "placeholder": "apps.templates.cq.Response content description",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "w8u72a",
+    "name": "apps.templates.basicDatasetChat.Dataset Search",
+    "avatar": "/imgs/module/db.svg",
+    "flowType": "datasetSearchNode",
+    "showStatus": true,
+    "position": {
+      "x": 1174.103323252265,
+      "y": 3775.2350412405754
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "datasets",
+        "type": "selectDataset",
+        "label": "apps.templates.basicDatasetChat.Associated dataset",
+        "value": [],
+        "valueType": "selectDataset",
+        "list": [],
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "similarity",
+        "type": "hidden",
+        "label": "apps.templates.basicDatasetChat.Minimum correlation",
+        "value": 0.9,
+        "valueType": "number",
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "markList": [
+          {
+            "label": "0",
+            "value": 0
+          },
+          {
+            "label": "1",
+            "value": 1
+          }
+        ],
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "limit",
+        "type": "hidden",
+        "label": "apps.templates.basicDatasetChat.Citation limit",
+        "description": "apps.templates.basicDatasetChat.Maximum number of Tokens for a single search",
+        "value": 750,
+        "valueType": "number",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "searchMode",
+        "type": "hidden",
+        "label": "core.dataset.search.Mode",
+        "valueType": "string",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "embedding",
+        "connected": false
+      },
+      {
+        "key": "datasetParamsModal",
+        "type": "selectDatasetParamsModal",
+        "label": "",
+        "valueType": "any",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "userChatInput",
+        "type": "target",
+        "label": "apps.templates.userChatInput.User question",
+        "required": true,
+        "valueType": "string",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      }
+    ],
+    "outputs": [
+      {
+        "key": "isEmpty",
+        "label": "common.Search results are empty",
+        "type": "source",
+        "valueType": "boolean",
+        "targets": []
+      },
+      {
+        "key": "unEmpty",
+        "label": "common.Search results not empty",
+        "type": "source",
+        "valueType": "boolean",
+        "targets": []
+      },
+      {
+        "key": "quoteQA",
+        "label": "apps.templates.userChatInput.Quoted content",
+        "description": "apps.templates.basicDatasetChat.Perform additional actions if you want the search result to be null",
+        "type": "source",
+        "valueType": "datasetQuote",
+        "targets": [
+          {
+            "moduleId": "cki1yp",
+            "key": "quoteQA"
+          }
+        ]
+      },
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "alpkz4",
+    "name": "apps.templates.cq.Designated reply",
+    "avatar": "/imgs/module/reply.svg",
+    "flowType": "answerNode",
+    "position": {
+      "x": 1976.0855006442007,
+      "y": 5047.470251950989
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "text",
+        "type": "textarea",
+        "valueType": "any",
+        "label": "apps.templates.cq.Response content",
+        "description": "apps.templates.cq.Response content description",
+        "placeholder": "apps.templates.cq.Response content description",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "value": "",
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "cki1yp",
+    "name": "apps.templates.userChatInput.AI Dialogue",
+    "avatar": "/imgs/module/ai.svg",
+    "flowType": "chatNode",
+    "showStatus": true,
+    "position": {
+      "x": 1950.3261633600853,
+      "y": 3687.518999273955
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "model",
+        "type": "selectChatModel",
+        "label": "apps.templates.userChatInput.dialog model",
+        "required": true,
+        "valueType": "string",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "ep-20250213141319-tbks4",
+        "connected": false
+      },
+      {
+        "key": "temperature",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Temperature",
+        "value": 0,
+        "valueType": "number",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "markList": [
+          {
+            "label": "apps.templates.userChatInput.Strict",
+            "value": 0
+          },
+          {
+            "label": "apps.templates.userChatInput.Divergent",
+            "value": 10
+          }
+        ],
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "maxToken",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Response limit",
+        "value": 0,
+        "valueType": "number",
+        "min": 100,
+        "max": 4000,
+        "step": 50,
+        "markList": [
+          {
+            "label": "100",
+            "value": 100
+          },
+          {
+            "label": "4000",
+            "value": 4000
+          }
+        ],
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "isResponseAnswerText",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Return to AI Content",
+        "value": true,
+        "valueType": "boolean",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "quoteTemplate",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Citation Content Templates",
+        "valueType": "string",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "quotePrompt",
+        "type": "hidden",
+        "label": "apps.templates.userChatInput.Quote content prompts",
+        "valueType": "string",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "aiSettings",
+        "type": "aiSettings",
+        "label": "",
+        "valueType": "any",
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "systemPrompt",
+        "type": "textarea",
+        "label": "apps.templates.userChatInput.System prompt words",
+        "max": 300,
+        "valueType": "string",
+        "description": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
+        "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "value": "直接输出{{a}}",
+        "connected": false
+      },
+      {
+        "key": "history",
+        "type": "numberInput",
+        "label": "apps.templates.userChatInput.Chat history",
+        "required": true,
+        "min": 0,
+        "max": 30,
+        "valueType": "chatHistory",
+        "value": 6,
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": false
+      },
+      {
+        "key": "quoteQA",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Quoted content",
+        "description": "apps.templates.userChatInput.Object Array Format",
+        "valueType": "datasetQuote",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      },
+      {
+        "key": "userChatInput",
+        "type": "target",
+        "label": "apps.templates.userChatInput.User question",
+        "required": true,
+        "valueType": "string",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      }
+    ],
+    "outputs": [
+      {
+        "key": "history",
+        "label": "apps.templates.userChatInput.New context",
+        "description": "apps.templates.userChatInput.Splice this reply into the history",
+        "valueType": "chatHistory",
+        "type": "source",
+        "targets": []
+      },
+      {
+        "key": "answerText",
+        "label": "chat.AI response content",
+        "description": "apps.templates.userChatInput.will be triggered when the stream has finished replying",
+        "valueType": "string",
+        "type": "source",
+        "targets": []
+      },
       {
         "key": "finish",
         "label": "apps.templates.userChatInput.Running done",

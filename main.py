@@ -187,6 +187,9 @@ def get_setting():
         logger.error(f"读取配置文件失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"读取配置文件失败: {str(e)}")
 
+@app.get("/test")
+def test():
+    return "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)"
 
 @app.get("/geocode")
 async def geocode_cities(
