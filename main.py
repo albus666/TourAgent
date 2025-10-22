@@ -1,13 +1,15 @@
 import json
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.responses import JSONResponse, Response
 import logging
 import os
 import httpx
+from typing import Dict
 from moudle.ctrip import CtripAPIHandler
 from moudle.mcp.mcp_api import BaiduMapAPI
+from moudle.utils.get_weather import get_weather
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -345,6 +347,130 @@ async def geocode_cities(
     except Exception as e:
         logger.error(f"地理编码时发生错误: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"地理编码失败: {str(e)}")
+
+
+@app.post("/weather")
+async def get_weather_by_location(location: Dict = Body(..., description="包含城市经纬度的字典")):
+    """
+    天气查询接口 - 根据地理编码返回的location数据查询天气
+    
+    Args:
+        location: 地理编码接口返回的location对象，格式如：
+                 {"city1_lng": 116.40717, "city1_lat": 39.90469, "city2_lng": 121.4737, "city2_lat": 31.23037}
+        
+    Returns:
+        JSONResponse: 包含各城市天气信息的响应
+        
+    Example:
+        POST /weather
+        Body: {"location": {"city1_lng": 116.40717, "city1_lat": 39.90469}}
+        返回: {
+            "success": true,
+            "count": 1,
+            "weather": {
+                "city1": {
+                    "location": "116.40717,39.90469",
+                    "weather": {...}
+                }
+            }
+        }
+    """
+    try:
+        logger.info(f"开始查询天气，location数据: {location}")
+        
+        if not location:
+            raise HTTPException(status_code=400, detail="location参数不能为空")
+        
+        # 解析location中的城市数量
+        city_count = 0
+        city_coords = {}
+        
+        # 统计有多少个城市（通过city_lng字段来计数）
+        for key in location.keys():
+            if key.endswith('_lng'):
+                city_num = key.replace('_lng', '')
+                city_count += 1
+                
+                lng = location.get(f"{city_num}_lng")
+                lat = location.get(f"{city_num}_lat")
+                
+                if lng is not None and lat is not None:
+                    city_coords[city_num] = f"{lng},{lat}"
+                else:
+                    city_coords[city_num] = None
+        
+        if city_count == 0:
+            raise HTTPException(status_code=400, detail="location数据格式错误，未找到有效的城市坐标")
+        
+        logger.info(f"解析到 {city_count} 个城市坐标")
+        
+        # 查询每个城市的天气
+        weather_data = {}
+        failed_cities = []
+        success_count = 0
+        
+        for city_num, coords in city_coords.items():
+            if coords is None:
+                logger.warning(f"{city_num} 的坐标为空，跳过查询")
+                weather_data[city_num] = {
+                    "location": None,
+                    "weather": None,
+                    "error": "坐标为空"
+                }
+                failed_cities.append(city_num)
+                continue
+            
+            try:
+                logger.info(f"正在查询 {city_num} 的天气，坐标: {coords}")
+                weather_result = get_weather(coords)
+                
+                if weather_result:
+                    weather_data[city_num] = {
+                        "location": coords,
+                        "weather": weather_result
+                    }
+                    success_count += 1
+                else:
+                    weather_data[city_num] = {
+                        "location": coords,
+                        "weather": None,
+                        "error": "天气查询失败"
+                    }
+                    failed_cities.append(city_num)
+                    
+            except Exception as e:
+                logger.error(f"查询 {city_num} 天气时发生错误: {str(e)}")
+                weather_data[city_num] = {
+                    "location": coords,
+                    "weather": None,
+                    "error": str(e)
+                }
+                failed_cities.append(city_num)
+        
+        # 判断是否全部成功
+        success = len(failed_cities) == 0
+        
+        logger.info(f"天气查询完成: 成功 {success_count}/{city_count}")
+        
+        response_data = {
+            "success": success,
+            "count": city_count,
+            "success_count": success_count,
+            "weather": weather_data
+        }
+        
+        # 如果有失败的城市，添加错误信息
+        if failed_cities:
+            response_data["failed_cities"] = failed_cities
+            response_data["message"] = f"部分城市天气查询失败: {', '.join(failed_cities)}"
+        
+        return JSONResponse(content=response_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"天气查询时发生错误: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"天气查询失败: {str(e)}")
 
 
 if __name__ == "__main__":
