@@ -456,6 +456,63 @@ async def plan_route_endpoint(request_data: Dict = Body(...)):
         raise HTTPException(status_code=500, detail=f"路线规划失败: {str(e)}")
 
 
+@app.post("/aggregate")
+async def aggregate_variables(request_data: Dict = Body(..., description="包含任意参数的字典")):
+    """
+    变量聚合器接口 - 将多个参数合并到一个JSON对象中
+    
+    Args:
+        request_data: 包含任意参数的字典，例如：
+                    {
+                        "原始文本": "这是一段原始文本",
+                        "路径规划": "从A点到B点的路线",
+                        "其他参数": 123
+                    }
+        
+    Returns:
+        JSONResponse: 包含所有输入参数的响应
+        
+    Example:
+        POST /aggregate
+        Body: {
+            "原始文本": "这是一段原始文本",
+            "路径规划": "从A点到B点的路线",
+            "数字参数": 123,
+            "布尔参数": true
+        }
+        返回: {
+            "success": true,
+            "data": {
+                "原始文本": "这是一段原始文本",
+                "路径规划": "从A点到B点的路线",
+                "数字参数": 123,
+                "布尔参数": true
+            }
+        }
+    """
+    try:
+        logger.info(f"开始聚合变量，输入参数: {request_data}")
+        
+        if not request_data:
+            raise HTTPException(status_code=400, detail="输入参数不能为空")
+        
+        # 直接返回输入的参数作为聚合结果
+        response_data = {
+            "success": True,
+            "data": request_data
+        }
+        
+        logger.info(f"变量聚合完成，共聚合 {len(request_data)} 个参数")
+        
+        return JSONResponse(content=response_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"变量聚合时发生错误: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"变量聚合失败: {str(e)}")
+
+
 @app.post("/weather")
 async def get_weather_by_location(location: Dict = Body(..., description="包含城市经纬度的字典")):
     """
