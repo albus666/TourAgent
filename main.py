@@ -193,44 +193,44 @@ def get_setting():
 async def image_proxy(url: str = Query(..., description="要代理的图片URL")):
     """
     图片代理接口 - 绕过防盗链
-    
+
     Args:
         url: 图片的完整URL
-        
+
     Returns:
         图片内容
-        
+
     Example:
         GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg
     """
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            # 设置请求头，伪装成从Gitee访问
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
                 'Referer': 'https://gitee.com/',
                 'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
                 'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
             }
-            
+
             response = await client.get(url, headers=headers, follow_redirects=True)
-            
+
             if response.status_code == 200:
-                # 获取内容类型
                 content_type = response.headers.get('content-type', 'image/jpeg')
-                
-                # 返回图片内容
+
                 return Response(
                     content=response.content,
                     media_type=content_type,
                     headers={
-                        'Cache-Control': 'public, max-age=86400',  # 缓存1天
-                        'Access-Control-Allow-Origin': '*'  # 允许跨域
+                        'Cache-Control': 'public, max-age=86400',
+                        'Access-Control-Allow-Origin': '*',
+                        'Connection': 'close',  # 添加这行：明确关闭连接
+                        'Content-Length': str(len(response.content))  # 添加这行：明确内容长度
                     }
                 )
             else:
                 raise HTTPException(status_code=response.status_code, detail=f"获取图片失败: {response.status_code}")
-                
+
+
     except httpx.TimeoutException:
         raise HTTPException(status_code=504, detail="请求超时")
     except Exception as e:
@@ -245,7 +245,7 @@ def test():
     """
     # 使用本地代理接口
     proxy_url = "http://www.atopes.xyz:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
-    
+
     return JSONResponse(
         content={
             "success": True,
