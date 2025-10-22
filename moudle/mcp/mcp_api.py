@@ -7,6 +7,7 @@ import requests
 import os
 import folium
 import time
+import re
 
 
 class BaiduMapAPI:
@@ -286,8 +287,8 @@ class BaiduMapAPI:
             
             for i, step in enumerate(steps, 1):
                 instruction = step.get("instruction", "")
-                # 去掉HTML标签
-                simplified_instruction = instruction.replace("<b>", "").replace("</b>", "")
+                # 使用正则表达式去掉所有HTML标签
+                simplified_instruction = re.sub(r'<[^>]+>', '', instruction)
                 route_text += f"{i}. {simplified_instruction}\n"
             
             # 返回包含文件路径和处理后文本的字典
