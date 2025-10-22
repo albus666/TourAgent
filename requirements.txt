@@ -1,1 +1,8 @@
-# pip install fastapi jinja2 requests jieba bs4 uvicorn
+# pip install fastapi jinja2 requests jieba bs4 uvicorn httpx
+fastapi
+uvicorn
+requests
+httpx
+jinja2
+jieba
+beautifulsoup4

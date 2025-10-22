@@ -1,8 +1,9 @@
 import json
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 import logging
 import os
+import httpx
 from moudle.ctrip import CtripAPIHandler
 from moudle.mcp.mcp_api import BaiduMapAPI
 
@@ -188,11 +189,63 @@ def get_setting():
         raise HTTPException(status_code=500, detail=f"读取配置文件失败: {str(e)}")
 
 
+@app.get("/image-proxy")
+async def image_proxy(url: str = Query(..., description="要代理的图片URL")):
+    """
+    图片代理接口 - 绕过防盗链
+    
+    Args:
+        url: 图片的完整URL
+        
+    Returns:
+        图片内容
+        
+    Example:
+        GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg
+    """
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            # 设置请求头，伪装成从Gitee访问
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Referer': 'https://gitee.com/',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            }
+            
+            response = await client.get(url, headers=headers, follow_redirects=True)
+            
+            if response.status_code == 200:
+                # 获取内容类型
+                content_type = response.headers.get('content-type', 'image/jpeg')
+                
+                # 返回图片内容
+                return Response(
+                    content=response.content,
+                    media_type=content_type,
+                    headers={
+                        'Cache-Control': 'public, max-age=86400',  # 缓存1天
+                        'Access-Control-Allow-Origin': '*'  # 允许跨域
+                    }
+                )
+            else:
+                raise HTTPException(status_code=response.status_code, detail=f"获取图片失败: {response.status_code}")
+                
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="请求超时")
+    except Exception as e:
+        logger.error(f"代理图片时发生错误: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"代理图片失败: {str(e)}")
+
+
 @app.get("/test")
 def test():
     """
     测试接口 - 返回图片信息
     """
+    # 使用本地代理接口
+    proxy_url = "http://localhost:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
+    
     return JSONResponse(
         content={
             "success": True,
@@ -201,7 +254,10 @@ def test():
                 "bing_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
                 "bing_markdown": "![test](https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525?rik=C0D21hJDYvXosw&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fwallpaper%2f1305%2f16%2fc4%2f20990657_1368686545122.jpg&ehk=netN2qzcCVS4ALUQfDOwxAwFcy41oxC%2b0xTFvOYy5ds%3d&risl=&pid=ImgRaw&r=0)",
                 "gitee_url":"https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
-                "gitee_markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)"
+                "gitee_markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)",
+                # 使用代理URL
+                "proxy_url": proxy_url,
+                "proxy_markdown": f"![test]({proxy_url})"
             }
         }
     )
