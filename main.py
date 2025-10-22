@@ -120,10 +120,10 @@ async def get_spot_detail_endpoint(keyword: str):
                 }
             )
 
-        # 格式化评论数据
-        formatted_comments = []
-        for comment in detail.get("comments", []):
-            formatted_comments.append({
+        # 格式化评论数据（由列表改为以“用户1”“用户2”作为键的字典）
+        formatted_comments = {}
+        for idx, comment in enumerate(detail.get("comments", []), start=1):
+            formatted_comments[f"用户{idx}"] = {
                 "userNick": comment.get("userNick"),
                 "userImage": comment.get("userImage"),
                 "score": comment.get("score"),
@@ -131,7 +131,7 @@ async def get_spot_detail_endpoint(keyword: str):
                 "publishTypeTag": comment.get("publishTypeTag"),
                 "ipLocatedName": comment.get("ipLocatedName"),
                 "imageUrl": comment.get("imageUrl")
-            })
+            }
 
         logger.info(f"成功获取景点详情，评论数: {detail.get('commentCount', 0)}")
 
