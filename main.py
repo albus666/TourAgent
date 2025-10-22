@@ -244,7 +244,7 @@ def test():
     测试接口 - 返回图片信息
     """
     # 使用本地代理接口
-    proxy_url = "http://localhost:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
+    proxy_url = "http://www.atopes.xyz:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
     
     return JSONResponse(
         content={
