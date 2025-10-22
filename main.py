@@ -197,7 +197,8 @@ def test():
             "success": True,
             "message": "测试图片",
             "image_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
-            "markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)"
+            "markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)",
+            "html":'<img src="https://gitee.com/Atopes/img-hosting/raw/master/test.jpg" alt="test">'
         }
     )
 
