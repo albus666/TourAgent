@@ -1,9 +1,10 @@
 import json
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 import logging
 import os
 import jinja2
+import requests
 from moudle.ctrip import CtripAPIHandler
 from moudle.mcp.mcp_api import BaiduMapAPI
 
@@ -205,13 +206,22 @@ def test():
     1. 模板存储在 templates/test.jinja2 文件中
     2. 模板和代码逻辑分离，易于维护
     3. 可以直接修改模板文件而无需改动代码
+    
+    图片显示方式：
+    - 方式1：直接使用无防盗链的图床（如 Bing）
+    - 方式2：使用 /image-proxy 接口代理有防盗链的图片
     """
     try:
+        # 原始 Gitee 图片链接（有防盗链）
+        gitee_image = "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
+        
         # 准备数据
         attraction_data = {
             "name": "测试景点",
+            # 方式1：直接使用 Bing 图片（无防盗链）
             "image_url": "https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525?rik=C0D21hJDYvXosw&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fwallpaper%2f1305%2f16%2fc4%2f20990657_1368686545122.jpg&ehk=netN2qzcCVS4ALUQfDOwxAwFcy41oxC%2b0xTFvOYy5ds%3d&risl=&pid=ImgRaw&r=0",
-            "wordcloud_url": "https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525?rik=C0D21hJDYvXosw&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fwallpaper%2f1305%2f16%2fc4%2f20990657_1368686545122.jpg&ehk=netN2qzcCVS4ALUQfDOwxAwFcy41oxC%2b0xTFvOYy5ds%3d&risl=&pid=ImgRaw&r=0",
+            # 方式2：使用代理接口绕过 Gitee 防盗链
+            "wordcloud_url": f"http://localhost:4399/image-proxy?url={gitee_image}",
             "score": 4.8
         }
         
@@ -223,12 +233,60 @@ def test():
             content={
                 "success": True,
                 "text": rendered_text,
-                "raw_data": attraction_data
+                "raw_data": attraction_data,
+                "tips": {
+                    "gitee_original": gitee_image,
+                    "gitee_proxied": f"http://localhost:4399/image-proxy?url={gitee_image}",
+                    "solution": "使用 /image-proxy 接口可以绕过防盗链限制"
+                }
             }
         )
     except Exception as e:
         logger.error(f"渲染模板失败: {str(e)}")
         raise HTTPException(status_code=500, detail=f"渲染模板失败: {str(e)}")
+
+
+@app.get("/image-proxy")
+async def image_proxy(url: str):
+    """
+    图片代理接口 - 解决防盗链问题
+    
+    通过服务器转发图片请求，绕过 Referer 检查
+    
+    Args:
+        url: 图片的原始URL
+        
+    Returns:
+        StreamingResponse: 图片数据流
+        
+    Example:
+        原图片URL: https://gitee.com/.../test.jpg
+        代理后: http://localhost:4399/image-proxy?url=https://gitee.com/.../test.jpg
+    """
+    try:
+        # 请求原始图片，不带 Referer 或使用合适的 headers
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            # 不设置 Referer，或设置为 Gitee 本身
+            'Referer': 'https://gitee.com/'
+        }
+        
+        response = requests.get(url, headers=headers, stream=True, timeout=10)
+        response.raise_for_status()
+        
+        # 获取图片类型
+        content_type = response.headers.get('Content-Type', 'image/jpeg')
+        
+        # 返回图片流
+        return StreamingResponse(
+            response.iter_content(chunk_size=8192),
+            media_type=content_type
+        )
+        
+    except Exception as e:
+        logger.error(f"代理图片失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"获取图片失败: {str(e)}")
+
 
 @app.get("/geocode")
 async def geocode_cities(
