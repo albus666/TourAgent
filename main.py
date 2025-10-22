@@ -130,7 +130,7 @@ async def get_spot_detail_endpoint(keyword: str):
                 "content": comment.get("content"),
                 "publishTypeTag": comment.get("publishTypeTag"),
                 "ipLocatedName": comment.get("ipLocatedName"),
-                "imageUrl": comment.get("imageUrl")
+                "imageUrl": f"![]({comment.get('imageUrl')})" if comment.get("imageUrl") else None
             }
 
         logger.info(f"成功获取景点详情，评论数: {detail.get('commentCount', 0)}")
