@@ -31,7 +31,8 @@ class BaiduMapAPI:
             '步行': 'walking',
             '公共交通': 'transit'
         }
-    
+
+
     def geocode(self, address: str, max_retries: int = 3, retry_delay: float = 1.0) -> Optional[Dict[str, Any]]:
         """
         地理编码 - 将地址转换为经纬度坐标（支持失败自动重试）
@@ -183,7 +184,7 @@ class BaiduMapAPI:
             return None
     
     def generate_route_map(self, route_data: Dict[str, Any], output_path: str = 'route_map.html', 
-                          sample_rate: int = 10) -> Optional[str]:
+                          sample_rate: int = 10) -> Optional[Dict[str, Any]]:
         """
         根据路线规划数据生成可视化地图HTML文件
         
@@ -193,7 +194,8 @@ class BaiduMapAPI:
             sample_rate: 路径点采样率（每N个点取1个，减少地图大小）
         
         返回:
-            成功返回HTML文件路径，失败返回 None
+            成功返回包含文件路径和路线文本的字典: {'html_path': 路径, 'route_text': 路线指引文本}
+            失败返回 None
         """
         try:
             # 处理路径：如果是相对路径，则相对于项目根目录
@@ -203,6 +205,7 @@ class BaiduMapAPI:
             route = route_data['result']['routes'][0]
             origin = route_data['result']['origin']
             destination = route_data['result']['destination']
+            steps = route['steps']
             
             # 收集所有路径点
             all_points = []
@@ -277,7 +280,21 @@ class BaiduMapAPI:
             print(f"📏 总距离: {route['distance'] / 1000:.1f}公里")
             print(f"⏱️  预计时长: {route['duration'] / 3600:.1f}小时")
             
-            return output_path
+            # 处理路线指引文本：提取instruction并去掉HTML标签
+            route_text = ""
+            info_str = f"📏 总距离: {route['distance'] / 1000:.1f}公里\n⏱️  预计时长: {route['duration'] / 3600:.1f}小时\n\n路线指引:\n"
+            
+            for i, step in enumerate(steps, 1):
+                instruction = step.get("instruction", "")
+                # 去掉HTML标签
+                simplified_instruction = instruction.replace("<b>", "").replace("</b>", "")
+                route_text += f"{i}. {simplified_instruction}\n"
+            
+            # 返回包含文件路径和处理后文本的字典
+            return {
+                "html_path": output_path,
+                "route_text": info_str + route_text
+            }
             
         except KeyError as e:
             print(f"路线数据格式错误，缺少字段: {e}")
@@ -313,12 +330,15 @@ if __name__ == '__main__':
             print("\n" + "="*50)
             print("生成路线地图")
             print("="*50)
-            html_file = api.generate_route_map(
+            result = api.generate_route_map(
                 route_data, 
                 output_path='dataset/route_map.html',
                 sample_rate=10
             )
             
-            if html_file:
+            if result:
                 print("\n✅ HTML地图生成完成！")
-                print("💡 如需保存为图片，请使用: moudle.utils.map_utils.save_map_as_image()")
+                print(f"📄 HTML文件: {result['html_path']}")
+                print("\n📝 路线文本：")
+                print(result['route_text'])
+                print("\n💡 如需保存为图片，请使用: moudle.utils.map_utils.save_map_as_image()")

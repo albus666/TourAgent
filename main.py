@@ -349,6 +349,113 @@ async def geocode_cities(
         raise HTTPException(status_code=500, detail=f"地理编码失败: {str(e)}")
 
 
+@app.post("/route/plan")
+async def plan_route_endpoint(request_data: Dict = Body(...)):
+    """
+    路线规划接口 - 规划两点之间的路线并生成地图
+    
+    输入格式（使用地理编码接口返回的location对象）:
+        {
+            "location": {
+                "city1_lng": 116.40717,
+                "city1_lat": 39.90469,
+                "city2_lng": 121.4737,
+                "city2_lat": 31.23037
+            },
+            "travel_model": "自驾",
+            "output_path": "dataset/route_map.html"  (可选)
+        }
+    
+    Returns:
+        JSONResponse: 包含地图路径和路线文本的响应
+        
+    Example:
+        POST /route/plan
+        Body: {
+            "location": {
+                "city1_lng": 116.40717,
+                "city1_lat": 39.90469,
+                "city2_lng": 121.4737,
+                "city2_lat": 31.23037
+            },
+            "travel_model": "自驾"
+        }
+        返回: {
+            "success": true,
+            "html_path": "E:\\TourAgent\\dataset\\route_map.html",
+            "route_text": "路线指引文本..."
+        }
+    """
+    try:
+        # 获取location对象
+        location = request_data.get("location")
+        if not location:
+            raise HTTPException(
+                status_code=400,
+                detail="必须提供location对象"
+            )
+        
+        # 获取出行方式和输出路径
+        travel_model = request_data.get("travel_model", "自驾")
+        output_path = request_data.get("output_path", "dataset/route_map.html")
+        
+        # 解析坐标 - 起点使用city1，终点使用city2
+        origin_lng = location.get("city1_lng")
+        origin_lat = location.get("city1_lat")
+        destination_lng = location.get("city2_lng")
+        destination_lat = location.get("city2_lat")
+        
+        if not all([origin_lng, origin_lat, destination_lng, destination_lat]):
+            raise HTTPException(
+                status_code=400,
+                detail="location对象必须包含 city1_lng, city1_lat, city2_lng, city2_lat"
+            )
+        
+        logger.info(f"开始路线规划: ({origin_lat},{origin_lng}) -> ({destination_lat},{destination_lng}), 方式: {travel_model}")
+        
+        # 构建坐标字典
+        origin = {"lat": origin_lat, "lng": origin_lng}
+        destination = {"lat": destination_lat, "lng": destination_lng}
+        
+        # 调用路线规划API
+        route_data = baidu_map_api.plan_route(origin, destination, travel_model)
+        
+        if not route_data:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "路线规划失败"
+                },
+                status_code=500
+            )
+        
+        # 生成地图并提取路线文本
+        result = baidu_map_api.generate_route_map(route_data, output_path)
+        
+        if not result:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "地图生成失败"
+                },
+                status_code=500
+            )
+        
+        logger.info(f"路线规划成功，地图已保存到: {result['html_path']}")
+        
+        return JSONResponse(
+            content={
+                "success": True,
+                "html_path": result['html_path'],
+                "route_text": result['route_text']
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"路线规划时发生错误: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"路线规划失败: {str(e)}")
+
+
 @app.post("/weather")
 async def get_weather_by_location(location: Dict = Body(..., description="包含城市经纬度的字典")):
     """
