@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 import os
+from jinja2 import Template
 from moudle.ctrip import CtripAPIHandler
 from moudle.mcp.mcp_api import BaiduMapAPI
 
@@ -190,15 +191,35 @@ def get_setting():
 @app.get("/test")
 def test():
     """
-    测试接口 - 返回图片信息
+    测试接口 - 使用 Jinja2 渲染图片信息
+    
+    在服务端使用 Jinja2 渲染模板，然后返回渲染后的 Markdown 文本
     """
+    # 准备数据
+    attraction_data = {
+        "name": "测试景点",
+        "image_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+        "wordcloud_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+        "score": 4.8
+    }
+    
+    # 定义 Jinja2 模板
+    template_str = """## {{ attraction.name }}
+
+![评价词云]({{ attraction.wordcloud_url }})
+
+**评分：** {{ attraction.score }}
+**图片链接：** {{ attraction.image_url }}"""
+    
+    # 渲染模板
+    template = Template(template_str)
+    rendered_text = template.render(attraction=attraction_data)
+    
     return JSONResponse(
         content={
             "success": True,
-            "message": "测试图片",
-            "image_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
-            "markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)",
-            "html":'<img src="https://gitee.com/Atopes/img-hosting/raw/master/test.jpg" alt="test">'
+            "text": rendered_text,
+            "raw_data": attraction_data
         }
     )
 
