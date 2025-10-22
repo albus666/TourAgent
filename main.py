@@ -189,7 +189,17 @@ def get_setting():
 
 @app.get("/test")
 def test():
-    return "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)"
+    """
+    测试接口 - 返回图片信息
+    """
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": "测试图片",
+            "image_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+            "markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)"
+        }
+    )
 
 @app.get("/geocode")
 async def geocode_cities(
