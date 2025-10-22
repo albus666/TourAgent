@@ -164,7 +164,7 @@ def get_setting():
     """
     try:
         # 读取JSON文件
-        json_path = os.path.join(os.path.dirname(__file__), "dataset", "旅游规划助手.json")
+        json_path = os.path.join(os.path.dirname(__file__), "dataset", "旅游出行助手.json")
         with open(json_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
