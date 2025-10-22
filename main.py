@@ -1,6 +1,6 @@
 import json
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse, Response, RedirectResponse
 import logging
 import os
 import httpx
@@ -190,19 +190,28 @@ def get_setting():
 
 
 @app.get("/image-proxy")
-async def image_proxy(url: str = Query(..., description="要代理的图片URL")):
+async def image_proxy(
+    url: str = Query(..., description="要代理的图片URL"),
+    redirect: bool = Query(False, description="是否使用重定向模式")
+):
     """
     图片代理接口 - 绕过防盗链
     
     Args:
         url: 图片的完整URL
+        redirect: 是否直接重定向到图片URL（适用于智能体平台）
         
     Returns:
-        图片内容
+        图片内容或重定向响应
         
     Example:
-        GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg
+        代理模式: GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg
+        重定向模式: GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg&redirect=true
     """
+    # 如果是重定向模式，直接返回302重定向
+    if redirect:
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url=url, status_code=302)
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             # 设置请求头，伪装成从Gitee访问
@@ -219,13 +228,18 @@ async def image_proxy(url: str = Query(..., description="要代理的图片URL")
                 # 获取内容类型
                 content_type = response.headers.get('content-type', 'image/jpeg')
                 
-                # 返回图片内容
+                # 返回图片内容，伪装成来自 Gitee
                 return Response(
                     content=response.content,
                     media_type=content_type,
                     headers={
-                        'Cache-Control': 'public, max-age=86400',  # 缓存1天
-                        'Access-Control-Allow-Origin': '*'  # 允许跨域
+                        'Cache-Control': 'public, max-age=86400',
+                        'Access-Control-Allow-Origin': '*',
+                        'X-Content-Type-Options': 'nosniff',
+                        'Content-Security-Policy': "default-src 'none'; img-src 'self' data: https:; style-src 'unsafe-inline'",
+                        # 伪装成来自 Gitee
+                        'Server': 'nginx',
+                        'X-Request-Id': 'gitee-proxy'
                     }
                 )
             else:
