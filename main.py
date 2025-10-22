@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 import logging
 import os
-from jinja2 import Template
+import jinja2
 from moudle.ctrip import CtripAPIHandler
 from moudle.mcp.mcp_api import BaiduMapAPI
 
@@ -23,6 +23,14 @@ ctrip_handler = CtripAPIHandler()
 
 # 初始化百度地图API处理器
 baidu_map_api = BaiduMapAPI()
+
+# 设置Jinja2环境
+template_dir = os.path.join(os.path.dirname(__file__), "templates")
+os.makedirs(template_dir, exist_ok=True)  # 确保目录存在
+jinja_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(template_dir),
+    autoescape=False  # Markdown 不需要转义
+)
 
 # # @app.get("/weather")
 # # def get_weather(cityNames: str):
@@ -191,37 +199,36 @@ def get_setting():
 @app.get("/test")
 def test():
     """
-    测试接口 - 使用 Jinja2 渲染图片信息
+    测试接口 - 使用 Jinja2 文件模板渲染图片信息
     
-    在服务端使用 Jinja2 渲染模板，然后返回渲染后的 Markdown 文本
+    采用专业的模板文件方式：
+    1. 模板存储在 templates/test.jinja2 文件中
+    2. 模板和代码逻辑分离，易于维护
+    3. 可以直接修改模板文件而无需改动代码
     """
-    # 准备数据
-    attraction_data = {
-        "name": "测试景点",
-        "image_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
-        "wordcloud_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
-        "score": 4.8
-    }
-    
-    # 定义 Jinja2 模板
-    template_str = """## {{ attraction.name }}
-
-![评价词云]({{ attraction.wordcloud_url }})
-
-**评分：** {{ attraction.score }}
-**图片链接：** {{ attraction.image_url }}"""
-    
-    # 渲染模板
-    template = Template(template_str)
-    rendered_text = template.render(attraction=attraction_data)
-    
-    return JSONResponse(
-        content={
-            "success": True,
-            "text": rendered_text,
-            "raw_data": attraction_data
+    try:
+        # 准备数据
+        attraction_data = {
+            "name": "测试景点",
+            "image_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+            "wordcloud_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+            "score": 4.8
         }
-    )
+        
+        # 从文件加载模板并渲染
+        template = jinja_env.get_template("test.jinja2")
+        rendered_text = template.render(attraction=attraction_data)
+        
+        return JSONResponse(
+            content={
+                "success": True,
+                "text": rendered_text,
+                "raw_data": attraction_data
+            }
+        )
+    except Exception as e:
+        logger.error(f"渲染模板失败: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"渲染模板失败: {str(e)}")
 
 @app.get("/geocode")
 async def geocode_cities(
