@@ -1,6 +1,6 @@
 import json
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse, Response, RedirectResponse
+from fastapi.responses import JSONResponse, Response
 import logging
 import os
 import httpx
@@ -190,27 +190,19 @@ def get_setting():
 
 
 @app.get("/image-proxy")
-async def image_proxy(
-    url: str = Query(..., description="要代理的图片URL"),
-    redirect: bool = Query(False, description="是否使用重定向模式")
-):
+async def image_proxy(url: str = Query(..., description="要代理的图片URL")):
     """
     图片代理接口 - 绕过防盗链
     
     Args:
         url: 图片的完整URL
-        redirect: 是否直接重定向到图片URL（适用于智能体平台）
         
     Returns:
-        图片内容或重定向响应
+        图片内容
         
     Example:
-        代理模式: GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg
-        重定向模式: GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg&redirect=true
+        GET /image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg
     """
-    # 如果是重定向模式，直接返回302重定向
-    if redirect:
-        return RedirectResponse(url=url, status_code=302)
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             # 设置请求头，伪装成从Gitee访问
@@ -227,18 +219,13 @@ async def image_proxy(
                 # 获取内容类型
                 content_type = response.headers.get('content-type', 'image/jpeg')
                 
-                # 返回图片内容，伪装成来自 Gitee
+                # 返回图片内容
                 return Response(
                     content=response.content,
                     media_type=content_type,
                     headers={
-                        'Cache-Control': 'public, max-age=86400',
-                        'Access-Control-Allow-Origin': '*',
-                        'X-Content-Type-Options': 'nosniff',
-                        'Content-Security-Policy': "default-src 'none'; img-src 'self' data: https:; style-src 'unsafe-inline'",
-                        # 伪装成来自 Gitee
-                        'Server': 'nginx',
-                        'X-Request-Id': 'gitee-proxy'
+                        'Cache-Control': 'public, max-age=86400',  # 缓存1天
+                        'Access-Control-Allow-Origin': '*'  # 允许跨域
                     }
                 )
             else:
@@ -256,24 +243,21 @@ def test():
     """
     测试接口 - 返回图片信息
     """
-    # 使用代理接口
+    # 使用本地代理接口
     proxy_url = "http://www.atopes.xyz:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
-    # 使用重定向模式（适用于智能体平台）
-    proxy_redirect_url = "http://www.atopes.xyz:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg&redirect=true"
     
     return JSONResponse(
         content={
             "success": True,
             "message": "测试图片",
             "test": {
+                "bing_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
+                "bing_markdown": "![test](https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525?rik=C0D21hJDYvXosw&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fwallpaper%2f1305%2f16%2fc4%2f20990657_1368686545122.jpg&ehk=netN2qzcCVS4ALUQfDOwxAwFcy41oxC%2b0xTFvOYy5ds%3d&risl=&pid=ImgRaw&r=0)",
                 "gitee_url":"https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
                 "gitee_markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)",
-                # 代理模式（适用于浏览器）
+                # 使用代理URL
                 "proxy_url": proxy_url,
-                "proxy_markdown": f"![test]({proxy_url})",
-                # 重定向模式（适用于智能体平台）
-                "proxy_redirect_url": proxy_redirect_url,
-                "proxy_redirect_markdown": f"![test]({proxy_redirect_url})"
+                "proxy_markdown": f"![test]({proxy_url})"
             }
         }
     )
