@@ -210,7 +210,6 @@ async def image_proxy(
     """
     # 如果是重定向模式，直接返回302重定向
     if redirect:
-        from fastapi.responses import RedirectResponse
         return RedirectResponse(url=url, status_code=302)
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -257,21 +256,24 @@ def test():
     """
     测试接口 - 返回图片信息
     """
-    # 使用本地代理接口
+    # 使用代理接口
     proxy_url = "http://www.atopes.xyz:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg"
+    # 使用重定向模式（适用于智能体平台）
+    proxy_redirect_url = "http://www.atopes.xyz:4399/image-proxy?url=https://gitee.com/Atopes/img-hosting/raw/master/test.jpg&redirect=true"
     
     return JSONResponse(
         content={
             "success": True,
             "message": "测试图片",
             "test": {
-                "bing_url": "https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
-                "bing_markdown": "![test](https://ts1.tc.mm.bing.net/th/id/R-C.987f582c510be58755c4933cda68d525?rik=C0D21hJDYvXosw&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fwallpaper%2f1305%2f16%2fc4%2f20990657_1368686545122.jpg&ehk=netN2qzcCVS4ALUQfDOwxAwFcy41oxC%2b0xTFvOYy5ds%3d&risl=&pid=ImgRaw&r=0)",
                 "gitee_url":"https://gitee.com/Atopes/img-hosting/raw/master/test.jpg",
                 "gitee_markdown": "![test](https://gitee.com/Atopes/img-hosting/raw/master/test.jpg)",
-                # 使用代理URL
+                # 代理模式（适用于浏览器）
                 "proxy_url": proxy_url,
-                "proxy_markdown": f"![test]({proxy_url})"
+                "proxy_markdown": f"![test]({proxy_url})",
+                # 重定向模式（适用于智能体平台）
+                "proxy_redirect_url": proxy_redirect_url,
+                "proxy_redirect_markdown": f"![test]({proxy_redirect_url})"
             }
         }
     )
