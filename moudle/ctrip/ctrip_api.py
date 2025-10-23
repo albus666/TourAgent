@@ -78,9 +78,9 @@ class CtripAPIHandler:
                     # 提取图片URL并清理尺寸参数
                     raw_image_url = item.get("imageUrl")
                     if raw_image_url:
-                        # 去除图片URL中的尺寸参数（如 _C_320_320）
+                        # 去除图片URL中的尺寸参数（如 _C_320_320, _R_320_320_Q70 等）
                         import re as _re
-                        image_url = _re.sub(r'_[A-Z]_\d+_\d+\.jpg$', '.jpg', raw_image_url)
+                        image_url = _re.sub(r'_[A-Z]_\d+_\d+(_Q\d+)?\.jpg$', '.jpg', raw_image_url)
                     break
 
         # 查找城市districtId（district类型）
