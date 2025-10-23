@@ -10,22 +10,22 @@ class CtripAPIHandler:
         """初始化API处理器"""
         self.session = requests.Session()
 
-    def _get_poi_id(self, city_name: str) -> Optional[int]:
+    def _search_poi_and_district(self, keyword: str) -> Dict[str, Any]:
         """
-        辅助方法：获取poiId
+        统一搜索方法：获取poiId和districtId
         
         Args:
-            city_name: 城市名称
+            keyword: 搜索关键词（景点名或城市名）
             
         Returns:
-            poiId或None
+            包含poiId和districtId的字典
         """
         url = "https://m.ctrip.com/restapi/soa2/30668/search"
         
         params = {
-            "action": "online",
+            "action": "globalonline",
             "source": "globalonline",
-            "keyword": city_name
+            "keyword": keyword
         }
 
         headers = {
@@ -45,9 +45,12 @@ class CtripAPIHandler:
         data = result.get("data", [])
         
         if not data:
-            return None
+            return {"poiId": None, "districtId": None}
 
-        # 优先查找sight类型
+        poi_id = None
+        district_id = None
+
+        # 查找景点poiId（sight类型）
         for item in data:
             if item.get("type") == "sight":
                 has_all_fields = (
@@ -59,27 +62,33 @@ class CtripAPIHandler:
                     item.get("productId") is not None
                 )
                 if has_all_fields:
-                    return item.get("poiId")
-        
-        # 如果找不到sight类型，再查找sightplay类型
-        for item in data:
-            if item.get("type") == "sightplay":
-                has_all_fields = (
-                    "districtName" in item and 
-                    "districtId" in item and 
-                    "productId" in item and
-                    item.get("districtName") is not None and
-                    item.get("districtId") is not None and
-                    item.get("productId") is not None
-                )
-                if has_all_fields:
-                    return item.get("poiId")
+                    poi_id = item.get("poiId")
+                    break
 
-        return None
+        # 查找城市districtId（district类型）
+        for item in data:
+            if item.get("type") == "district":
+                district_id = item.get("id")
+                break
+
+        return {"poiId": poi_id, "districtId": district_id}
+
+    def _get_poi_id(self, keyword: str) -> Optional[int]:
+        """
+        获取poiId（景点ID）
+        
+        Args:
+            keyword: 景点关键词
+            
+        Returns:
+            poiId或None
+        """
+        result = self._search_poi_and_district(keyword)
+        return result.get("poiId")
 
     def _get_district_id(self, city_name: str) -> Optional[int]:
         """
-        辅助方法：获取districtId
+        获取districtId（城市ID）
         
         Args:
             city_name: 城市名称
@@ -87,34 +96,8 @@ class CtripAPIHandler:
         Returns:
             districtId或None
         """
-        url = "https://m.ctrip.com/restapi/soa2/30668/search"
-        
-        params = {
-            "action": "online",
-            "source": "globalonline",
-            "keyword": city_name
-        }
-
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
-            "Accept": "*/*",
-            "Connection": "keep-alive",
-            "Cookie": "GUID=09031022317999445208",
-            "Host": "m.ctrip.com",
-            "Content-Length": "0"
-        }
-
-        response = self.session.post(url, params=params, headers=headers)
-        response.raise_for_status()
-        
-        result = response.json()
-        data = result.get("data", [])
-        
-        if not data:
-            return None
-
-        return data[0].get("id")
+        result = self._search_poi_and_district(city_name)
+        return result.get("districtId")
 
     def get_city_spots(self, city_name: str, count: int = 10) -> Dict[str, Any]:
         """
