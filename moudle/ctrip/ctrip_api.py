@@ -174,33 +174,6 @@ class CtripAPIHandler:
             # 提取轮播图片URL
             carousel_images = []
             
-            # 方法1：使用正则表达式匹配
-            swiper_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
-            swiper_matches = _re.findall(swiper_pattern, resp.text)
-            carousel_images.extend(swiper_matches)
-            
-            # 方法2：如果正则没找到，尝试更宽泛的匹配
-            if not carousel_images:
-                general_pattern = r'style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"'
-                all_matches = _re.findall(general_pattern, resp.text)
-                carousel_images.extend(all_matches)
-            
-            # 方法3：尝试使用XPath定位（如果安装了lxml）
-            try:
-                from lxml import html
-                tree = html.fromstring(resp.text)
-                # 根据您提供的路径：/html/body/div[2]/div[2]/div[1]/div[3]/div/div[3]/div[1]/div[1]/div[1]
-                # 查找该路径下的所有div元素
-                xpath_elements = tree.xpath('//div[@class="swiper-slide"]')
-                for element in xpath_elements:
-                    style = element.get('style', '')
-                    if 'background-image' in style:
-                        img_match = _re.search(r'url\(&quot;([^&"]+)&quot;\)', style)
-                        if img_match:
-                            carousel_images.append(img_match.group(1))
-            except ImportError:
-                pass  # 如果没有lxml，跳过XPath方法
-            
             # 去重并过滤，只保留携程图片URL
             carousel_images = list(set([img for img in carousel_images if img.startswith('http') and 'ctrip.com' in img]))
             
@@ -242,6 +215,19 @@ class CtripAPIHandler:
             phone_match = _re.search(r'<span class="phoneHeaderItem">([^<]+)</span>', resp.text)
             if phone_match:
                 base_info["联系电话"] = phone_match.group(1)
+            
+            # 提取模块信息（detailModule结构）
+            module_info = {}
+            # 匹配 moduleTitle 和对应的 moduleContent
+            module_pattern = r'<div class="moduleTitle">([^<]+)</div>.*?<div class="moduleContent[^"]*"[^>]*>(.*?)</div>'
+            module_matches = _re.findall(module_pattern, resp.text, _re.DOTALL)
+            
+            for module_title, module_content in module_matches:
+                # 清理HTML标签和特殊字符
+                clean_content = _re.sub(r'<[^>]+>', '', module_content)
+                clean_content = clean_content.replace('&nbsp;', ' ').replace('\n', ' ').strip()
+                if clean_content and clean_content != '...':
+                    module_info[module_title] = clean_content
 
             return {
                 "success": True,
@@ -252,7 +238,8 @@ class CtripAPIHandler:
                     "comment_count": comment_count,
                     "heat_score": heat_score,
                     "carousel_images": carousel_images,
-                    "base_info": base_info
+                    "base_info": base_info,
+                    "module_info": module_info
                 }
             }
         except Exception as e:
