@@ -469,16 +469,6 @@ async def plan_route_endpoint(request_data: Dict = Body(...)):
                 detail="必须提供location对象"
             )
         
-        # 如果location是字符串，则解析为字典
-        if isinstance(location, str):
-            try:
-                location = json.loads(location)
-            except json.JSONDecodeError as e:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"location参数JSON格式错误: {str(e)}"
-                )
-        
         # 获取出行方式和输出路径
         travel_model = request_data.get("travel_model", "自驾")
         output_path = request_data.get("output_path", "dataset/route_map.html")
@@ -628,16 +618,6 @@ async def get_weather_by_location(location: Dict = Body(..., description="包含
         
         if not location:
             raise HTTPException(status_code=400, detail="location参数不能为空")
-        
-        # 如果location是字符串，则解析为字典
-        if isinstance(location, str):
-            try:
-                location = json.loads(location)
-            except json.JSONDecodeError as e:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"location参数JSON格式错误: {str(e)}"
-                )
         
         # 解析location中的城市数量
         city_count = 0
