@@ -174,6 +174,47 @@ class CtripAPIHandler:
             # 提取轮播图片URL
             carousel_images = []
             
+            # 使用CSS选择器路径匹配轮播图片
+            # 匹配 .swiper-wrapper 下的所有 .swiper-slide 元素
+            swiper_wrapper_pattern = r'<div class="swiper-wrapper"[^>]*>(.*?)</div>'
+            wrapper_match = _re.search(swiper_wrapper_pattern, resp.text, _re.DOTALL)
+            
+            if wrapper_match:
+                wrapper_content = wrapper_match.group(1)
+                # 在wrapper内匹配所有swiper-slide
+                slide_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
+                slide_matches = _re.findall(slide_pattern, wrapper_content)
+                carousel_images.extend(slide_matches)
+            
+            # 如果上面没找到，尝试更宽泛的匹配
+            if not carousel_images:
+                # 匹配所有包含 background-image 的 div
+                general_pattern = r'style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"'
+                all_matches = _re.findall(general_pattern, resp.text)
+                carousel_images.extend(all_matches)
+            
+            # 如果还是没找到，尝试使用更精确的路径匹配
+            if not carousel_images:
+                # 基于您提供的JS路径：baseInfoModule > swiper > swiperMain > swiper-wrapper
+                base_info_module_pattern = r'<div class="baseInfoModule"[^>]*>(.*?)</div>'
+                base_info_match = _re.search(base_info_module_pattern, resp.text, _re.DOTALL)
+                if base_info_match:
+                    base_info_content = base_info_match.group(1)
+                    # 在baseInfoModule内查找swiper
+                    swiper_pattern = r'<div class="swiper"[^>]*>(.*?)</div>'
+                    swiper_match = _re.search(swiper_pattern, base_info_content, _re.DOTALL)
+                    if swiper_match:
+                        swiper_content = swiper_match.group(1)
+                        # 在swiper内查找swiper-wrapper
+                        wrapper_pattern = r'<div class="swiper-wrapper"[^>]*>(.*?)</div>'
+                        wrapper_match = _re.search(wrapper_pattern, swiper_content, _re.DOTALL)
+                        if wrapper_match:
+                            wrapper_content = wrapper_match.group(1)
+                            # 在wrapper内匹配swiper-slide
+                            slide_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
+                            slide_matches = _re.findall(slide_pattern, wrapper_content)
+                            carousel_images.extend(slide_matches)
+            
             # 去重并过滤，只保留携程图片URL
             carousel_images = list(set([img for img in carousel_images if img.startswith('http') and 'ctrip.com' in img]))
             
