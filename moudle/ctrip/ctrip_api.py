@@ -235,6 +235,11 @@ class CtripAPIHandler:
                 if clean_content and clean_content != '...':
                     module_info[module_title] = clean_content
 
+            # 提取景点图片URL（从搜索结果中获取）
+            image_url = None
+            # 这里可以从之前的搜索结果中获取图片URL
+            # 或者从页面中提取图片URL
+            
             return {
                 "success": True,
                 "message": "成功获取景点详情",
@@ -243,6 +248,7 @@ class CtripAPIHandler:
                     "score": score,
                     "comment_count": comment_count,
                     "heat_score": heat_score,
+                    "image_url": image_url,
                     "base_info": base_info,
                     "module_info": module_info
                 }

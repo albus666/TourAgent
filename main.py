@@ -196,7 +196,14 @@ async def get_spot_detail_by_keyword(keyword: str = Query(..., description="景�
             )
 
         sight_url = url_result["sightUrl"]
+        image_url = url_result.get("imageUrl")  # 获取图片URL
         detail_result = ctrip_handler.crawl_spot_detail_by_url(sight_url)
+
+        # 将图片URL添加到详情数据中
+        if detail_result.get("success") and image_url:
+            detail_data = detail_result.get("data", {})
+            detail_data["image_url"] = image_url
+            detail_result["data"] = detail_data
 
         # 合并与返回
         return JSONResponse(
