@@ -183,9 +183,6 @@ class CtripAPIHandler:
 
             import re as _re
             
-            # 提取轮播图片URL
-            carousel_images = []
-
             # 提取景点标题
             title_match = _re.search(r'<h1[^>]*>([^<]+)</h1>', resp.text)
             title = title_match.group(1) if title_match else ""
@@ -246,7 +243,6 @@ class CtripAPIHandler:
                     "score": score,
                     "comment_count": comment_count,
                     "heat_score": heat_score,
-                    "carousel_images": carousel_images,
                     "base_info": base_info,
                     "module_info": module_info
                 }
