@@ -173,8 +173,8 @@ class CtripAPIHandler:
             
             # 提取轮播图片URL
             carousel_images = []
-            # 匹配 swiper-slide 中的 background-image
-            swiper_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
+            # 匹配 swiper-wrapper 下的 swiper-slide swiperItem 中的 background-image
+            swiper_pattern = r'<div class="swiper-slide swiperItem[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
             swiper_matches = _re.findall(swiper_pattern, resp.text)
             carousel_images.extend(swiper_matches)
             
