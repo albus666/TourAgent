@@ -174,24 +174,35 @@ class CtripAPIHandler:
             # 提取轮播图片URL
             carousel_images = []
             
-            # 先尝试匹配 swiper-wrapper 区域
-            swiper_wrapper_match = _re.search(r'<div class="swiper-wrapper"[^>]*>(.*?)</div>', resp.text, _re.DOTALL)
-            if swiper_wrapper_match:
-                wrapper_content = swiper_wrapper_match.group(1)
-                # 在 swiper-wrapper 内匹配 swiper-slide
-                swiper_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
-                swiper_matches = _re.findall(swiper_pattern, wrapper_content)
-                carousel_images.extend(swiper_matches)
+            # 方法1：使用正则表达式匹配
+            swiper_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
+            swiper_matches = _re.findall(swiper_pattern, resp.text)
+            carousel_images.extend(swiper_matches)
             
-            # 如果上面没找到，尝试更宽泛的匹配
+            # 方法2：如果正则没找到，尝试更宽泛的匹配
             if not carousel_images:
-                # 匹配所有包含 background-image 的 div
                 general_pattern = r'style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"'
                 all_matches = _re.findall(general_pattern, resp.text)
                 carousel_images.extend(all_matches)
             
-            # 去重并过滤，只保留图片URL
-            carousel_images = list(set([img for img in carousel_images if img.startswith('https') and 'ctrip.com' in img]))
+            # 方法3：尝试使用XPath定位（如果安装了lxml）
+            try:
+                from lxml import html
+                tree = html.fromstring(resp.text)
+                # 根据您提供的路径：/html/body/div[2]/div[2]/div[1]/div[3]/div/div[3]/div[1]/div[1]/div[1]
+                # 查找该路径下的所有div元素
+                xpath_elements = tree.xpath('//div[@class="swiper-slide"]')
+                for element in xpath_elements:
+                    style = element.get('style', '')
+                    if 'background-image' in style:
+                        img_match = _re.search(r'url\(&quot;([^&"]+)&quot;\)', style)
+                        if img_match:
+                            carousel_images.append(img_match.group(1))
+            except ImportError:
+                pass  # 如果没有lxml，跳过XPath方法
+            
+            # 去重并过滤，只保留携程图片URL
+            carousel_images = list(set([img for img in carousel_images if img.startswith('http') and 'ctrip.com' in img]))
             
             # 提取景点标题
             title_match = _re.search(r'<h1[^>]*>([^<]+)</h1>', resp.text)
