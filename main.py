@@ -176,6 +176,51 @@ async def get_spot_detail_endpoint(keyword: str):
         )
 
 
+@app.get("/spots/detail-by-keyword")
+async def get_spot_detail_by_keyword(keyword: str = Query(..., description="景点关键词")):
+    """
+    单一接口：根据关键词先获取详情页URL，再用URL爬取详情并返回
+    """
+    try:
+        logger.info(f"开始根据关键词获取景点详情: {keyword}")
+        url_result = ctrip_handler.get_spot_detail_page(keyword)
+
+        if not url_result.get("success") or not url_result.get("sightUrl"):
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "keyword": keyword,
+                    "message": url_result.get("message", "未获取到详情页URL")
+                },
+                status_code=404
+            )
+
+        sight_url = url_result["sightUrl"]
+        detail_result = ctrip_handler.crawl_spot_detail_by_url(sight_url)
+
+        # 合并与返回
+        return JSONResponse(
+            content={
+                "success": detail_result.get("success", False),
+                "keyword": keyword,
+                "sightUrl": sight_url,
+                "message": detail_result.get("message"),
+                "data": detail_result.get("data", {})
+            },
+            status_code=200 if detail_result.get("success") else 500
+        )
+    except Exception as e:
+        logger.error(f"根据关键词获取详情失败: {str(e)}", exc_info=True)
+        return JSONResponse(
+            content={
+                "success": False,
+                "keyword": keyword,
+                "message": f"获取详情失败: {str(e)}"
+            },
+            status_code=500
+        )
+
+
 @app.get("/setting")
 def get_setting():
     """

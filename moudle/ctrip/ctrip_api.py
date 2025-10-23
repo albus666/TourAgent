@@ -12,13 +12,13 @@ class CtripAPIHandler:
 
     def _search_poi_and_district(self, keyword: str) -> Dict[str, Any]:
         """
-        统一搜索方法：获取poiId和districtId
+        统一搜索方法：获取poiId、districtId 及景点详情页URL
         
         Args:
             keyword: 搜索关键词（景点名或城市名）
             
         Returns:
-            包含poiId和districtId的字典
+            包含 poiId、districtId、sightUrl 的字典
         """
         url = "https://m.ctrip.com/restapi/soa2/30668/search"
         
@@ -45,10 +45,11 @@ class CtripAPIHandler:
         data = result.get("data", [])
         
         if not data:
-            return {"poiId": None, "districtId": None}
+            return {"poiId": None, "districtId": None, "sightUrl": None}
 
         poi_id = None
         district_id = None
+        sight_url: Optional[str] = None
 
         # 查找景点poiId（sight类型）
         for item in data:
@@ -63,6 +64,15 @@ class CtripAPIHandler:
                 )
                 if has_all_fields:
                     poi_id = item.get("poiId")
+                    # 构造景点详情页URL（优先使用 eName，无则使用 districtName）
+                    district_name = item.get("eName") or item.get("districtName") or ""
+                    district_id = item.get("districtId")
+                    product_id = item.get("productId")
+                    if district_name is not None and district_id is not None and product_id is not None:
+                        try:
+                            sight_url = f"https://you.ctrip.com/sight/{district_name}{district_id}/{product_id}.html"
+                        except Exception:
+                            sight_url = None
                     break
 
         # 查找城市districtId（district类型）
@@ -71,7 +81,7 @@ class CtripAPIHandler:
                 district_id = item.get("id")
                 break
 
-        return {"poiId": poi_id, "districtId": district_id}
+        return {"poiId": poi_id, "districtId": district_id, "sightUrl": sight_url}
 
     def _get_poi_id(self, keyword: str) -> Optional[int]:
         """
@@ -98,6 +108,121 @@ class CtripAPIHandler:
         """
         result = self._search_poi_and_district(city_name)
         return result.get("districtId")
+
+    def get_spot_detail_page(self, keyword: str) -> Dict[str, Any]:
+        """
+        通过关键词获取景点详情页URL，并可供爬虫使用
+        
+        Args:
+            keyword: 景点关键词
+        
+        Returns:
+            {"success": bool, "keyword": str, "poiId": Optional[int], "sightUrl": Optional[str], "message": str}
+        """
+        try:
+            result = self._search_poi_and_district(keyword)
+            sight_url = result.get("sightUrl")
+            poi_id = result.get("poiId")
+            if not sight_url or not poi_id:
+                return {
+                    "success": False,
+                    "keyword": keyword,
+                    "poiId": poi_id,
+                    "sightUrl": sight_url,
+                    "message": "未找到景点详情页URL或POI ID"
+                }
+            return {
+                "success": True,
+                "keyword": keyword,
+                "poiId": poi_id,
+                "sightUrl": sight_url,
+                "message": "成功获取景点详情页URL"
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "keyword": keyword,
+                "poiId": None,
+                "sightUrl": None,
+                "message": f"获取详情页URL时发生异常: {e}"
+            }
+
+    def crawl_spot_detail_by_url(self, url: str) -> Dict[str, Any]:
+        """
+        爬取景点详情页，提取评分、评论统计等关键信息
+        
+        Args:
+            url: 景点详情页URL
+        
+        Returns:
+            参考 get_info 的结构，包含评分与评论统计等
+        """
+        try:
+            headers = {
+                "User-Agent": "PostmanRuntime-ApipostRuntime/1.1.0",
+                "Cookie": "_pd=%7B%22_o%22%3A70%2C%22s%22%3A1030%2C%22_s%22%3A9%7D;GUID=09031167317991829446"
+            }
+            resp = self.session.get(url, headers=headers)
+            resp.raise_for_status()
+
+            # 提取 __NEXT_DATA__ JSON
+            import re as _re
+            _script_match = _re.search(r'<script id="__NEXT_DATA__".*?>(.*?)</script>', resp.text, _re.DOTALL)
+            if not _script_match:
+                return {
+                    "success": False,
+                    "message": "未找到页面数据",
+                    "data": {}
+                }
+
+            _json_data = json.loads(_script_match.group(1))
+            poi_data = (_json_data.get("props", {})
+                                   .get("pageProps", {})
+                                   .get("initialState", {})
+                                   .get("poiDetail", {}))
+
+            # 提取标签统计
+            hot_tags_section = _re.search(r'<div class="hotTags".*?>(.*?)</div>', resp.text, _re.DOTALL)
+            def _extract_number(text: str) -> int:
+                m = _re.search(r'\d+', text or '')
+                return int(m.group()) if m else 0
+
+            review_count = 0
+            positive = 0
+            negative = 0
+            if hot_tags_section:
+                span_pattern = _re.compile(r'<span.*?>(.*?)</span>')
+                spans = span_pattern.findall(hot_tags_section.group(1))
+                review_count = _extract_number(spans[0]) if len(spans) >= 1 else 0
+                positive = _extract_number(spans[1]) if len(spans) >= 2 else 0
+                negative = _extract_number(spans[3]) if len(spans) >= 4 else 0
+
+            # 评分兼容多个字段
+            def _to_float(v):
+                try:
+                    return float(v)
+                except Exception:
+                    return 0.0
+            comment_score = _to_float(poi_data.get("commentScore")) or _to_float(poi_data.get("score"))
+
+            return {
+                "success": True,
+                "message": "成功获取景点信息",
+                "data": {
+                    "poi_id": int(poi_data.get("poiId", 0) or 0),
+                    "poi_name": str(poi_data.get("poiName", "") or ""),
+                    "comment_score": comment_score,
+                    "review_count": review_count,
+                    "positive": positive,
+                    "negative": negative
+                }
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"爬取详情页失败: {e}",
+                "data": {}
+            }
 
     def get_city_spots(self, city_name: str, count: int = 10) -> Dict[str, Any]:
         """
@@ -198,7 +323,7 @@ class CtripAPIHandler:
     def get_spot_detail(self, keyword: str) -> Dict[str, Any]:
         """
         获取景点详情和评论（景点详情查询）
-        读取3个用户的评论，如果评论有图片则各附上一张图片链接
+        读取5个用户的评论，如果评论有图片则各附上一张图片链接
         
         Args:
             keyword: 景点关键词
@@ -214,9 +339,7 @@ class CtripAPIHandler:
             return {
                 "success": False,
                 "keyword": keyword,
-                "poiId": None,
                 "comments": [],
-                "commentCount": 0,
                 "message": "未找到景点对应的poiId"
             }
 
@@ -229,7 +352,7 @@ class CtripAPIHandler:
                 "collapseType": 0,
                 "commentTagId": 0,
                 "pageIndex": 1,
-                "pageSize": 3,  # 只读取3个评论
+                "pageSize": 5,  # 只读取5个评论
                 "poiId": poi_id,
                 "sourceType": 1,
                 "sortType": 3,
@@ -270,9 +393,7 @@ class CtripAPIHandler:
                 return {
                     "success": False,
                     "keyword": keyword,
-                    "poiId": poi_id,
                     "comments": [],
-                    "commentCount": 0,
                     "message": "评论接口无返回"
                 }
 
@@ -283,9 +404,7 @@ class CtripAPIHandler:
                 return {
                     "success": False,
                     "keyword": keyword,
-                    "poiId": poi_id,
                     "comments": [],
-                    "commentCount": 0,
                     "message": "评论接口返回格式错误"
                 }
 
@@ -329,9 +448,7 @@ class CtripAPIHandler:
             return {
                 "success": False,
                 "keyword": keyword,
-                "poiId": poi_id,
                 "comments": [],
-                "commentCount": 0,
                 "message": f"评论接口请求失败: {e}"
             }
         except Exception as e:
@@ -339,9 +456,7 @@ class CtripAPIHandler:
             return {
                 "success": False,
                 "keyword": keyword,
-                "poiId": poi_id,
                 "comments": [],
-                "commentCount": 0,
                 "message": f"获取评论时发生异常: {e}"
             }
 
