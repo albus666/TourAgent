@@ -47,8 +47,23 @@ class CtripAPIHandler:
         if not data:
             return None
 
+        # 优先查找sight类型
         for item in data:
             if item.get("type") == "sight":
+                has_all_fields = (
+                    "districtName" in item and 
+                    "districtId" in item and 
+                    "productId" in item and
+                    item.get("districtName") is not None and
+                    item.get("districtId") is not None and
+                    item.get("productId") is not None
+                )
+                if has_all_fields:
+                    return item.get("poiId")
+        
+        # 如果找不到sight类型，再查找sightplay类型
+        for item in data:
+            if item.get("type") == "sightplay":
                 has_all_fields = (
                     "districtName" in item and 
                     "districtId" in item and 
