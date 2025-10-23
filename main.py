@@ -47,22 +47,23 @@ async def get_city_spots_endpoint(cityName: str, count: int = 10):
         logger.info(f"开始查询城市景点: {cityName}, 数量: {count}")
 
         # 获取城市景点推荐
-        spots = ctrip_handler.get_city_spots(cityName, count)
+        result = ctrip_handler.get_city_spots(cityName, count)
 
-        if not spots:
+        # 检查是否成功
+        if not result.get("success", False):
             return JSONResponse(
                 content={
-                    "success": True,
+                    "success": False,
                     "cityName": cityName,
                     "count": 0,
                     "spots": [],
-                    "message": f"未找到{cityName}的景点信息"
+                    "message": result.get("message", "查询失败")
                 }
             )
 
         # 格式化返回数据
         formatted_spots = []
-        for spot in spots:
+        for spot in result.get("spots", []):
             formatted_spots.append({
                 "poiId": spot.get("poiId"),
                 "poiName": spot.get("poiName"),
@@ -85,13 +86,23 @@ async def get_city_spots_endpoint(cityName: str, count: int = 10):
                 "success": True,
                 "cityName": cityName,
                 "count": len(formatted_spots),
-                "spots": formatted_spots
+                "spots": formatted_spots,
+                "message": result.get("message", "查询成功")
             }
         )
 
     except Exception as e:
         logger.error(f"查询城市景点时发生错误: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"查询失败: {str(e)}")
+        return JSONResponse(
+            content={
+                "success": False,
+                "cityName": cityName,
+                "count": 0,
+                "spots": [],
+                "message": f"查询失败: {str(e)}"
+            },
+            status_code=500
+        )
 
 
 @app.get("/spots/detail")
@@ -111,16 +122,20 @@ async def get_spot_detail_endpoint(keyword: str):
         # 获取景点详情
         detail = ctrip_handler.get_spot_detail(keyword)
 
-        if not detail:
+        # 检查是否成功
+        if not detail.get("success", False):
             return JSONResponse(
                 content={
                     "success": False,
                     "keyword": keyword,
-                    "message": "未找到景点信息"
+                    "poiId": detail.get("poiId"),
+                    "commentCount": 0,
+                    "comments": {},
+                    "message": detail.get("message", "查询失败")
                 }
             )
 
-        # 格式化评论数据（由列表改为以“用户1”“用户2”作为键的字典）
+        # 格式化评论数据（由列表改为以"用户1""用户2"作为键的字典）
         formatted_comments = {}
         for idx, comment in enumerate(detail.get("comments", []), start=1):
             formatted_comments[f"用户{idx}"] = {
@@ -140,18 +155,25 @@ async def get_spot_detail_endpoint(keyword: str):
             "keyword": detail.get("keyword"),
             "poiId": detail.get("poiId"),
             "commentCount": detail.get("commentCount"),
-            "comments": formatted_comments
+            "comments": formatted_comments,
+            "message": detail.get("message", "查询成功")
         }
-
-        # 如果有错误信息，也包含进去
-        if "error" in detail:
-            response_data["warning"] = detail["error"]
 
         return JSONResponse(content=response_data)
 
     except Exception as e:
         logger.error(f"查询景点详情时发生错误: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"查询失败: {str(e)}")
+        return JSONResponse(
+            content={
+                "success": False,
+                "keyword": keyword,
+                "poiId": None,
+                "commentCount": 0,
+                "comments": {},
+                "message": f"查询失败: {str(e)}"
+            },
+            status_code=500
+        )
 
 
 @app.get("/setting")

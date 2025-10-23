@@ -101,7 +101,7 @@ class CtripAPIHandler:
 
         return data[0].get("id")
 
-    def get_city_spots(self, city_name: str, count: int = 10) -> List[Dict[str, Any]]:
+    def get_city_spots(self, city_name: str, count: int = 10) -> Dict[str, Any]:
         """
         根据城市名获取景点列表（城市景点推荐）
         
@@ -110,7 +110,7 @@ class CtripAPIHandler:
             count: 返回景点数量，默认10个
             
         Returns:
-            景点卡片列表
+            包含景点列表和状态信息的字典
         """
         all_spots = []
         
@@ -120,7 +120,13 @@ class CtripAPIHandler:
             print(f"获取到districtId: {district_id}")
             
             if district_id is None:
-                return all_spots
+                return {
+                    "success": False,
+                    "cityName": city_name,
+                    "count": 0,
+                    "spots": [],
+                    "message": f"未找到城市 {city_name} 对应的districtId"
+                }
 
             url = "https://m.ctrip.com/restapi/soa2/18109/json/getAttractionList"
             
@@ -175,8 +181,21 @@ class CtripAPIHandler:
 
         except Exception as e:
             print(f"查询景点异常: {e}")
+            return {
+                "success": False,
+                "cityName": city_name,
+                "count": 0,
+                "spots": [],
+                "message": f"查询景点时发生异常: {e}"
+            }
 
-        return all_spots
+        return {
+            "success": True,
+            "cityName": city_name,
+            "count": len(all_spots),
+            "spots": all_spots,
+            "message": f"成功获取 {len(all_spots)} 个景点"
+        }
 
     def get_spot_detail(self, keyword: str) -> Dict[str, Any]:
         """
@@ -194,7 +213,14 @@ class CtripAPIHandler:
         print(f"获取到poiId: {poi_id}")
         
         if poi_id is None:
-            raise RuntimeError("未找到景点对应的poiId")
+            return {
+                "success": False,
+                "keyword": keyword,
+                "poiId": None,
+                "comments": [],
+                "commentCount": 0,
+                "message": "未找到景点对应的poiId"
+            }
 
         # 评论请求部分
         comment_url = "https://m.ctrip.com/restapi/soa2/13444/json/getCommentCollapseList"
@@ -244,11 +270,12 @@ class CtripAPIHandler:
             if not comment_response:
                 print("警告: 评论接口无返回")
                 return {
+                    "success": False,
                     "keyword": keyword,
                     "poiId": poi_id,
                     "comments": [],
                     "commentCount": 0,
-                    "error": "评论接口无返回"
+                    "message": "评论接口无返回"
                 }
 
             comment_root = json.loads(comment_response)
@@ -256,11 +283,12 @@ class CtripAPIHandler:
             if not comment_root or "result" not in comment_root:
                 print(f"警告: 评论接口返回格式错误")
                 return {
+                    "success": False,
                     "keyword": keyword,
                     "poiId": poi_id,
                     "comments": [],
                     "commentCount": 0,
-                    "error": "评论接口返回格式错误"
+                    "message": "评论接口返回格式错误"
                 }
 
             items = comment_root.get("result", {}).get("items", [])
@@ -289,80 +317,84 @@ class CtripAPIHandler:
                 comments.append(comment)
             
             return {
+                "success": True,
                 "keyword": keyword,
                 "poiId": poi_id,
                 "comments": comments,
-                "commentCount": len(comments)
+                "commentCount": len(comments),
+                "message": "成功获取景点详情"
             }
         except requests.exceptions.HTTPError as e:
             print(f"警告: 评论接口请求失败 - {e}")
             return {
+                "success": False,
                 "keyword": keyword,
                 "poiId": poi_id,
                 "comments": [],
                 "commentCount": 0,
-                "error": f"HTTP错误: {e}"
+                "message": f"评论接口请求失败: {e}"
             }
         except Exception as e:
             print(f"警告: 获取评论时发生异常 - {e}")
             return {
+                "success": False,
                 "keyword": keyword,
                 "poiId": poi_id,
                 "comments": [],
                 "commentCount": 0,
-                "error": f"异常: {e}"
+                "message": f"获取评论时发生异常: {e}"
             }
 
 
 if __name__ == '__main__':
     """测试携程API处理器"""
     handler = CtripAPIHandler()
-    #
-    # print("=" * 80)
-    # print("测试 1: 城市景点推荐 - get_city_spots()")
-    # print("=" * 80)
-    # try:
-    #     spots = handler.get_city_spots("北京", count=5)
-    #     print(f"\n✓ 成功获取北京景点推荐，共 {len(spots)} 个景点")
-    #     for i, spot in enumerate(spots, 1):
-    #         # spot 本身就是 card 对象
-    #         print(f"\n景点 {i}:")
-    #         print(f"  名称: {spot.get('poiName', 'N/A')}")
-    #         print(f"  ID: {spot.get('poiId', 'N/A')}")
-    #         print(f"  评分: {spot.get('commentScore', 'N/A')} 分")
-    #         print(f"  评论数: {spot.get('commentCount', 'N/A')}")
-    #         print(f"  区域: {spot.get('zoneName', 'N/A')}")
-    #         print(f"  距离: {spot.get('distanceStr', 'N/A')}")
-    #         # 打印特色标签
-    #         features = spot.get('shortFeatures', [])
-    #         if features:
-    #             print(f"  特色: {', '.join(features)}")
-    # except Exception as e:
-    #     print(f"\n✗ 测试失败: {e}")
-    #
-    # print("\n" + "=" * 80)
-    # print("测试 2: 景点详情查询 - get_spot_detail()")
-    # print("=" * 80)
-    try:
-        detail = handler.get_spot_detail("上海迪士尼")
-        print(f"\n✓ 成功获取景点详情")
-        print(f"  关键词: {detail['keyword']}")
-        print(f"  POI ID: {detail['poiId']}")
-        print(f"  评论数量: {detail['commentCount']}")
 
-        print(f"\n用户评论:")
-        for i, comment in enumerate(detail['comments'], 1):
-            print(f"\n  【评论 {i}】")
-            print(f"    用户: {comment.get('userNick', '匿名')}")
-            print(f"    评分: {comment.get('score', 'N/A')} 分")
-            print(f"    位置: {comment.get('ipLocatedName', 'N/A')}")
-            content = comment.get('content', '')
-            print(f"    内容: {content[:80]}..." if len(content) > 80 else f"    内容: {content}")
-            if comment.get('imageUrl'):
-                print(f"    图片: {comment['imageUrl']}")
+    print("=" * 80)
+    print("测试 1: 城市景点推荐 - get_city_spots()")
+    print("=" * 80)
+    try:
+        spots = handler.get_city_spots("北京", count=5)
+        print(f"\n✓ 成功获取北京景点推荐，共 {len(spots)} 个景点")
+        for i, spot in enumerate(spots, 1):
+            # spot 本身就是 card 对象
+            print(f"\n景点 {i}:")
+            print(f"  名称: {spot.get('poiName', 'N/A')}")
+            print(f"  ID: {spot.get('poiId', 'N/A')}")
+            print(f"  评分: {spot.get('commentScore', 'N/A')} 分")
+            print(f"  评论数: {spot.get('commentCount', 'N/A')}")
+            print(f"  区域: {spot.get('zoneName', 'N/A')}")
+            print(f"  距离: {spot.get('distanceStr', 'N/A')}")
+            # 打印特色标签
+            features = spot.get('shortFeatures', [])
+            if features:
+                print(f"  特色: {', '.join(features)}")
     except Exception as e:
         print(f"\n✗ 测试失败: {e}")
 
     print("\n" + "=" * 80)
-    print("所有测试完成！")
-    print("=" * 80)
+    # print("测试 2: 景点详情查询 - get_spot_detail()")
+    # print("=" * 80)
+    # try:
+    #     detail = handler.get_spot_detail("上海迪士尼")
+    #     print(f"\n✓ 成功获取景点详情")
+    #     print(f"  关键词: {detail['keyword']}")
+    #     print(f"  POI ID: {detail['poiId']}")
+    #     print(f"  评论数量: {detail['commentCount']}")
+    #
+    #     print(f"\n用户评论:")
+    #     for i, comment in enumerate(detail['comments'], 1):
+    #         print(f"\n  【评论 {i}】")
+    #         print(f"    用户: {comment.get('userNick', '匿名')}")
+    #         print(f"    评分: {comment.get('score', 'N/A')} 分")
+    #         print(f"    位置: {comment.get('ipLocatedName', 'N/A')}")
+    #         content = comment.get('content', '')
+    #         print(f"    内容: {content[:80]}..." if len(content) > 80 else f"    内容: {content}")
+    #         if comment.get('imageUrl'):
+    #             print(f"    图片: {comment['imageUrl']}")
+    # except Exception as e:
+    #     print(f"\n✗ 测试失败: {e}")
+    #
+    # print("\n" + "=" * 80)
+    # print("所有测试完成！")
+    # print("=" * 80)
