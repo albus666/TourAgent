@@ -149,72 +149,87 @@ class CtripAPIHandler:
 
     def crawl_spot_detail_by_url(self, url: str) -> Dict[str, Any]:
         """
-        爬取景点详情页，提取评分、评论统计等关键信息
+        爬取景点详情页，提取轮播图片和基础信息
         
         Args:
             url: 景点详情页URL
         
         Returns:
-            参考 get_info 的结构，包含评分与评论统计等
+            包含轮播图片URL列表和基础信息的字典
         """
         try:
             headers = {
-                "User-Agent": "PostmanRuntime-ApipostRuntime/1.1.0",
-                "Cookie": "_pd=%7B%22_o%22%3A70%2C%22s%22%3A1030%2C%22_s%22%3A9%7D;GUID=09031167317991829446"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.0.0",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1"
             }
             resp = self.session.get(url, headers=headers)
             resp.raise_for_status()
 
-            # 提取 __NEXT_DATA__ JSON
             import re as _re
-            _script_match = _re.search(r'<script id="__NEXT_DATA__".*?>(.*?)</script>', resp.text, _re.DOTALL)
-            if not _script_match:
-                return {
-                    "success": False,
-                    "message": "未找到页面数据",
-                    "data": {}
-                }
-
-            _json_data = json.loads(_script_match.group(1))
-            poi_data = (_json_data.get("props", {})
-                                   .get("pageProps", {})
-                                   .get("initialState", {})
-                                   .get("poiDetail", {}))
-
-            # 提取标签统计
-            hot_tags_section = _re.search(r'<div class="hotTags".*?>(.*?)</div>', resp.text, _re.DOTALL)
-            def _extract_number(text: str) -> int:
-                m = _re.search(r'\d+', text or '')
-                return int(m.group()) if m else 0
-
-            review_count = 0
-            positive = 0
-            negative = 0
-            if hot_tags_section:
-                span_pattern = _re.compile(r'<span.*?>(.*?)</span>')
-                spans = span_pattern.findall(hot_tags_section.group(1))
-                review_count = _extract_number(spans[0]) if len(spans) >= 1 else 0
-                positive = _extract_number(spans[1]) if len(spans) >= 2 else 0
-                negative = _extract_number(spans[3]) if len(spans) >= 4 else 0
-
-            # 评分兼容多个字段
-            def _to_float(v):
-                try:
-                    return float(v)
-                except Exception:
-                    return 0.0
-            comment_score = _to_float(poi_data.get("commentScore")) or _to_float(poi_data.get("score"))
+            
+            # 提取轮播图片URL
+            carousel_images = []
+            # 匹配 swiper-slide 中的 background-image
+            swiper_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
+            swiper_matches = _re.findall(swiper_pattern, resp.text)
+            carousel_images.extend(swiper_matches)
+            
+            # 去重并过滤
+            carousel_images = list(set([img for img in carousel_images if img.startswith('http')]))
+            
+            # 提取景点标题
+            title_match = _re.search(r'<h1[^>]*>([^<]+)</h1>', resp.text)
+            title = title_match.group(1) if title_match else ""
+            
+            # 提取评分
+            score_match = _re.search(r'<p class="commentScoreNum">([^<]+)</p>', resp.text)
+            score = float(score_match.group(1)) if score_match else 0.0
+            
+            # 提取评论数
+            comment_match = _re.search(r'<span class="hover-underline">(\d+)<!-- -->条点评</span>', resp.text)
+            comment_count = int(comment_match.group(1)) if comment_match else 0
+            
+            # 提取热度
+            heat_match = _re.search(r'<div class="heatScoreText">([^<]+)</div>', resp.text)
+            heat_score = float(heat_match.group(1)) if heat_match else 0.0
+            
+            # 提取基础信息
+            base_info = {}
+            base_info_pattern = r'<div class="baseInfoItem"[^>]*><p class="baseInfoTitle">([^<]+)</p><[^>]*class="baseInfoText[^"]*"[^>]*>([^<]+)</[^>]*></div>'
+            base_info_matches = _re.findall(base_info_pattern, resp.text)
+            
+            for title_text, content_text in base_info_matches:
+                # 清理HTML标签和特殊字符
+                clean_content = _re.sub(r'<[^>]+>', '', content_text)
+                clean_content = clean_content.replace('&nbsp;', ' ').strip()
+                if clean_content:
+                    base_info[title_text] = clean_content
+            
+            # 提取开放时间特殊处理
+            open_time_match = _re.search(r'<span class="openStatus">([^<]+)</span>.*?([^<]+开放)', resp.text)
+            if open_time_match:
+                base_info["开放状态"] = open_time_match.group(1)
+                base_info["开放时间"] = open_time_match.group(2)
+            
+            # 提取电话信息
+            phone_match = _re.search(r'<span class="phoneHeaderItem">([^<]+)</span>', resp.text)
+            if phone_match:
+                base_info["联系电话"] = phone_match.group(1)
 
             return {
                 "success": True,
-                "message": "成功获取景点信息",
+                "message": "成功获取景点详情",
                 "data": {
-                    "poi_id": int(poi_data.get("poiId", 0) or 0),
-                    "poi_name": str(poi_data.get("poiName", "") or ""),
-                    "comment_score": comment_score,
-                    "review_count": review_count,
-                    "positive": positive,
-                    "negative": negative
+                    "title": title,
+                    "score": score,
+                    "comment_count": comment_count,
+                    "heat_score": heat_score,
+                    "carousel_images": carousel_images,
+                    "base_info": base_info
                 }
             }
         except Exception as e:
