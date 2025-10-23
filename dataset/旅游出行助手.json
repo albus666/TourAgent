@@ -587,11 +587,11 @@
         "type": "hidden",
         "targets": [
           {
-            "moduleId": "z7tp6o",
+            "moduleId": "yeovv8",
             "key": "switch"
           },
           {
-            "moduleId": "yeovv8",
+            "moduleId": "ow1vab",
             "key": "switch"
           }
         ]
@@ -767,6 +767,10 @@
           {
             "moduleId": "jchve5",
             "key": "cityNames"
+          },
+          {
+            "moduleId": "ow1vab",
+            "key": "cityName"
           }
         ]
       },
@@ -799,11 +803,11 @@
             "key": "original_text"
           },
           {
-            "moduleId": "tpnip7",
+            "moduleId": "ntuahi",
             "key": "original_text"
           },
           {
-            "moduleId": "ntuahi",
+            "moduleId": "tpnip7",
             "key": "original_text"
           }
         ]
@@ -812,13 +816,13 @@
   },
   {
     "moduleId": "z7tp6o",
-    "name": "景点详情查询",
+    "name": "游客评价查询",
     "avatar": "/imgs/module/http.svg",
     "flowType": "httpRequest",
     "showStatus": true,
     "position": {
-      "x": 2718.3127224649493,
-      "y": 877.843540279619
+      "x": 3492.794080359611,
+      "y": 845.5205056216071
     },
     "inputs": [
       {
@@ -1204,8 +1208,8 @@
     "flowType": "httpRequest",
     "showStatus": true,
     "position": {
-      "x": 3508.6187621996614,
-      "y": 3155.282391250557
+      "x": 3493.3910030018105,
+      "y": 3226.078124231198
     },
     "inputs": [
       {
@@ -1597,8 +1601,8 @@
     "flowType": "chatNode",
     "showStatus": true,
     "position": {
-      "x": 5366.3821553157695,
-      "y": 1952.9359655826638
+      "x": 5353.380735307805,
+      "y": 1938.589307532814
     },
     "inputs": [
       {
@@ -1714,7 +1718,7 @@
         "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "value": "你是旅游规划助手，根据已有文本，优雅地回答用户的问题",
+        "value": "角色设定：\n你是一名专业、细致且高效的中文旅游规划助手。\n你具备深厚的旅游策划经验，能够基于结构化数据（如官方推荐信息、游客评论、图片等）生成自然流畅、优雅可靠、具有可执行性的出行建议或完整行程方案。\n\n🎯 目标\n\n基于用户提供的结构化输入数据，自动输出一份高质量的旅行推荐内容：\n\n优先展示景点名称与图片（使用 Markdown 语法直接输出）\n\n提炼官方信息（位置、等级、价格、特色等）\n\n分析评论中可用的游玩建议\n\n给出实用的出行规划\n\n所有输出均以 Markdown 格式 呈现（非代码块）\n\n🪶 输出格式要求（AI 生成内容时必须遵守）\n🔹 一级逻辑：\n\n对输入中的每个景点依次输出以下内容：\n\n## 🏞 景点名称\n![景点图片](coverImageUrl)\n\n### 📍 官方信息\n- 所在区域：{zoneName}\n- 景区等级：{sightLevelStr 或 “未评级”}\n- 评分：{commentScore} / 5 （共 {commentCount} 条评论）\n- 距离市中心：{distanceStr}\n- 门票价格：{price 或 “暂无”} 元（{priceTypeDesc}）\n- 特色亮点：{shortFeatures 合并为自然句}\n- 详情链接：[查看详情]({detailUrl})\n\n### 💬 游客实用反馈\n根据评分和评论数推测游客体验，例如：\n- 若评分 ≥ 4.6：突出高满意度与游玩亮点  \n- 若评分 4.3~4.5：描述为“整体良好、细节有提升空间”  \n- 若评分 < 4.3：指出可能存在的体验差异  \n\n### 🧭 出行建议\n根据以上信息综合生成一句自然的出行建议：\n- 推荐游玩顺序（例如“建议先游清明上河园，再观看《大宋东京梦华》演出”）  \n- 建议游玩时间段（如“下午至夜晚观看灯光表演”）  \n- 特别提示（如“建议提前在线购票”“适合家庭出游”等）\n\n🔹 总结输出\n\n在所有景点展示完后，生成一个小结：\n\n### ✨ 开封旅游小结\n综合推荐前 2–3 个最具代表性的景点，给出简短的整体出行规划。\n\n💬 语气要求：\n\n全程使用自然流畅的简体中文\n\n语言专业、温暖、礼貌、有温度\n\n逻辑清晰、条理分明\n\n不出现英文或程序说明文字",
         "connected": false
       },
       {
@@ -1987,8 +1991,8 @@
     "flowType": "httpRequest",
     "showStatus": true,
     "position": {
-      "x": 4438.18142240882,
-      "y": 771.1000410595269
+      "x": 4443.931798614386,
+      "y": 770.6226307416762
     },
     "inputs": [
       {
@@ -2052,7 +2056,7 @@
         "key": "system_httpJsonBody",
         "type": "hidden",
         "valueType": "any",
-        "value": "{\r\n  \"用户问题\":\"{{original_text}}\",\r\n  \"游客评价内容\":\"{{comments}}\"\r\n}",
+        "value": "{\r\n  \"用户问题\":\"{{original_text}}\",\r\n  \"游客评价内容\":\"{{comments}}\",\r\n  \"官网信息\":\"{{data}}\"\r\n}",
         "label": "",
         "required": false,
         "showTargetInApp": false,
@@ -2089,7 +2093,8 @@
         "key": "comments"
       },
       {
-        "valueType": "any",
+        "key": "original_text",
+        "valueType": "string",
         "label": "用户问题",
         "type": "target",
         "required": true,
@@ -2102,8 +2107,24 @@
           "required": true,
           "dataType": true
         },
+        "connected": true
+      },
+      {
+        "valueType": "string",
+        "label": "官网信息",
+        "type": "target",
+        "required": true,
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
         "connected": true,
-        "key": "original_text"
+        "key": "data"
       },
       {
         "key": "system_addInputParam",
@@ -2391,8 +2412,8 @@
     "flowType": "chatNode",
     "showStatus": true,
     "position": {
-      "x": 5367.986057135633,
-      "y": 3213.2864562147965
+      "x": 5361.3577899619195,
+      "y": 3218.2576565950817
     },
     "inputs": [
       {
@@ -2508,7 +2529,7 @@
         "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "value": "你是旅游规划助手，根据已有文本，优雅地回答用户的问题",
+        "value": "角色：你是一名专业、细致且高效的中文旅游规划助手。\n目标：基于用户提供的文本与资料，生成优雅、可靠、可执行的出行建议或完整行程方案；当用户提供图片，直接以 Markdown 图片语法原样输出。\n语言：始终使用简体中文，表达自然、精炼、礼貌且有温度。",
         "connected": false
       },
       {
@@ -2696,7 +2717,7 @@
         "placeholder": "模型固定的引导词，通过调整该内容，可以引导模型聊天方向。该内容会被固定在上下文的开头。可使用变量，例如 {{language}}",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "value": "你是旅游规划助手，根据已有文本，优雅地回答用户的问题",
+        "value": "角色设定：\n你是一名专业、细致且高效的中文旅游规划助手，具备深厚的旅游地理知识与出行策划经验。\n你能基于用户提供的内容（包括官方资料、游客评论、图片等），快速生成优雅、可靠且可执行的旅行建议或完整行程方案，文本中标题可以以符合的表情符号开头，最终以markdown语法风格输出。\n\n核心要求：\n\n输出语言：\n始终使用自然、优雅、亲切的简体中文。语气温和、有温度但不啰嗦，兼具专业性与实用性。\n\n内容结构：\n\n（1）展示官方信息： \n先展示景点名字以及景点图像\n简明提炼官方资料中的重点，如景区位置、开放时间、特色、门票等。\n\n（2）提取游客评论亮点： 从评论中分析出有价值的出行建议（如最佳游玩时间、拍照点、交通体验、避坑提示等）。\n\n（3）整合生成出行建议或行程方案： 根据官方与游客信息，提供清晰可执行的旅行路线或游玩建议。\n\n（4）展示图片： 若已获取图片链接，请直接以 Markdown 语法原样输出，例如：\n\n![描述](图片URL)\n\n\n信息缺失时：\n若输入内容不足以生成完整方案，应先验证关键词是否正确，并礼貌提醒用户提供更准确信息或补充资料。\n\n风格与语调：\n\n优雅、可靠、逻辑清晰\n\n用词专业但易懂\n\n体现“专业规划师 + 贴心导游”的语气",
         "connected": false
       },
       {
@@ -2757,6 +2778,202 @@
         "valueType": "boolean",
         "type": "source",
         "targets": []
+      }
+    ]
+  },
+  {
+    "moduleId": "ow1vab",
+    "name": "景点官网查询",
+    "avatar": "/imgs/module/http.svg",
+    "flowType": "httpRequest",
+    "showStatus": true,
+    "position": {
+      "x": 2523.9705124298603,
+      "y": 864.6109734588313
+    },
+    "inputs": [
+      {
+        "key": "switch",
+        "type": "target",
+        "label": "apps.templates.userChatInput.Trigger",
+        "valueType": "any",
+        "showTargetInApp": true,
+        "showTargetInPlugin": true,
+        "connected": true
+      },
+      {
+        "key": "system_httpMethod",
+        "type": "custom",
+        "valueType": "string",
+        "label": "",
+        "value": "GET",
+        "required": true,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpReqUrl",
+        "type": "hidden",
+        "valueType": "string",
+        "label": "",
+        "description": "core.module.input.description.Http Request Url",
+        "placeholder": "https://api.ai.com/getInventory",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "value": "http://www.atopes.xyz:4399/spots/detail-by-keyword",
+        "connected": false
+      },
+      {
+        "key": "system_httpHeader",
+        "type": "custom",
+        "valueType": "any",
+        "value": [],
+        "label": "",
+        "description": "core.module.input.description.Http Request Header",
+        "placeholder": "core.module.input.description.Http Request Header",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpParams",
+        "type": "hidden",
+        "valueType": "any",
+        "value": [
+          {
+            "key": "keyword",
+            "value": "{{cityName}}",
+            "type": "string"
+          }
+        ],
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "system_httpJsonBody",
+        "type": "hidden",
+        "valueType": "any",
+        "value": "",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "connected": false
+      },
+      {
+        "key": "DYNAMIC_INPUT_KEY",
+        "type": "target",
+        "valueType": "any",
+        "label": "core.module.inputType.dynamicTargetInput",
+        "description": "core.module.input.description.dynamic input",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": true,
+        "hideInApp": true,
+        "connected": false
+      },
+      {
+        "valueType": "string",
+        "label": "cityName",
+        "type": "target",
+        "required": true,
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "key": "cityName",
+        "connected": true
+      },
+      {
+        "key": "system_addInputParam",
+        "type": "addInputParam",
+        "valueType": "any",
+        "label": "",
+        "required": false,
+        "showTargetInApp": false,
+        "showTargetInPlugin": false,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "required": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "inputType": "target",
+          "valueType": "string",
+          "required": true
+        },
+        "connected": false
+      }
+    ],
+    "outputs": [
+      {
+        "key": "finish",
+        "label": "apps.templates.userChatInput.Running done",
+        "description": "apps.templates.userChatInput.Running done trigger",
+        "valueType": "boolean",
+        "type": "source",
+        "targets": [
+          {
+            "moduleId": "z7tp6o",
+            "key": "switch"
+          }
+        ]
+      },
+      {
+        "key": "system_addOutputParam",
+        "type": "addOutputParam",
+        "valueType": "any",
+        "label": "",
+        "targets": [],
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "defaultEditField": {
+          "label": "",
+          "key": "",
+          "description": "",
+          "outputType": "source",
+          "valueType": "string"
+        }
+      },
+      {
+        "type": "source",
+        "valueType": "any",
+        "label": "官网信息",
+        "description": "",
+        "edit": true,
+        "editField": {
+          "key": true,
+          "name": true,
+          "description": true,
+          "dataType": true
+        },
+        "targets": [
+          {
+            "moduleId": "tpnip7",
+            "key": "data"
+          }
+        ],
+        "key": "data"
       }
     ]
   }
