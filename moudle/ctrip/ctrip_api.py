@@ -325,7 +325,11 @@ class CtripAPIHandler:
                 # 如果有图片，只附上一张图片链接
                 images = item.get("images", [])
                 if images and len(images) > 0:
-                    comment["imageUrl"] = images[0].get("imageThumbUrl")
+                    image_url = images[0].get("imageThumbUrl")
+                    # 将图片链接末尾的D_180_180替换为W_640_10000以获取更高分辨率
+                    if image_url and "D_180_180" in image_url:
+                        image_url = image_url.replace("D_180_180", "W_640_10000")
+                    comment["imageUrl"] = image_url
                 else:
                     comment["imageUrl"] = None
                 
