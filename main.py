@@ -403,37 +403,24 @@ async def geocode_cities(
 
         # 判断是否全部成功
         success = len(failed_cities) == 0
-        success_count = len(city_list) - len(failed_cities)
 
-        logger.info(f"地理编码完成: 成功 {success_count}/{len(city_list)}")
+        logger.info(f"地理编码完成: 成功 {len(city_list) - len(failed_cities)}/{len(city_list)}")
 
         response_data = {
             "success": success,
             "location": location
         }
 
-        # 构建message字段记录日志信息
-        if success:
-            response_data["message"] = f"地理编码成功，共处理 {len(city_list)} 个城市，全部成功"
-        elif success_count > 0:
+        # 如果有失败的城市，添加错误信息
+        if failed_cities:
             response_data["failed_cities"] = failed_cities
-            response_data["message"] = f"地理编码部分成功，成功 {success_count}/{len(city_list)} 个城市，失败城市: {', '.join(failed_cities)}"
-        else:
-            response_data["failed_cities"] = failed_cities
-            response_data["message"] = f"地理编码全部失败，共 {len(city_list)} 个城市均无法获取坐标"
+            response_data["message"] = f"部分城市编码失败: {', '.join(failed_cities)}"
 
         return JSONResponse(content=response_data)
 
     except Exception as e:
         logger.error(f"地理编码时发生错误: {str(e)}", exc_info=True)
-        return JSONResponse(
-            content={
-                "success": False,
-                "location": {},
-                "message": f"地理编码服务异常: {str(e)}"
-            },
-            status_code=500
-        )
+        raise HTTPException(status_code=500, detail=f"地理编码失败: {str(e)}")
 
 
 @app.post("/route/plan")
