@@ -482,8 +482,8 @@
     "flowType": "classifyQuestion",
     "showStatus": true,
     "position": {
-      "x": 530.8437070475562,
-      "y": 1202.814072464819
+      "x": 523.5623084872334,
+      "y": 1242.861764546595
     },
     "inputs": [
       {
@@ -622,6 +622,10 @@
           },
           {
             "moduleId": "1rh057",
+            "key": "switch"
+          },
+          {
+            "moduleId": "lbigtg",
             "key": "switch"
           }
         ]
@@ -1216,8 +1220,8 @@
     "flowType": "httpRequest",
     "showStatus": true,
     "position": {
-      "x": 4487.217861203933,
-      "y": 3305.5680247960527
+      "x": 4406.397834570957,
+      "y": 3342.0162721011206
     },
     "inputs": [
       {
@@ -1281,7 +1285,7 @@
         "key": "system_httpJsonBody",
         "type": "hidden",
         "valueType": "any",
-        "value": "{\r\n  \"location\": {{location}},\r\n  \"travel_model\":\"{{travel_model}}\"\r\n}",
+        "value": "{\r\n  \"location\": \"{{location}}\",\r\n  \"travel_model\":\"{{travel_model}}\"\r\n}",
         "label": "",
         "required": false,
         "showTargetInApp": false,
@@ -1318,7 +1322,6 @@
         "connected": true
       },
       {
-        "key": "location",
         "valueType": "any",
         "label": "地理编码",
         "type": "target",
@@ -1332,7 +1335,8 @@
           "required": true,
           "dataType": true
         },
-        "connected": true
+        "connected": true,
+        "key": "location"
       },
       {
         "key": "system_addInputParam",
@@ -3003,7 +3007,7 @@
         "valueType": "any",
         "showTargetInApp": true,
         "showTargetInPlugin": true,
-        "connected": false
+        "connected": true
       },
       {
         "key": "datasets",
@@ -3200,7 +3204,7 @@
         "key": "isResponseAnswerText",
         "type": "hidden",
         "label": "apps.templates.userChatInput.Return to AI Content",
-        "value": true,
+        "value": false,
         "valueType": "boolean",
         "showTargetInApp": false,
         "showTargetInPlugin": false,
@@ -3319,7 +3323,7 @@
     "flowType": "contentExtract",
     "showStatus": true,
     "position": {
-      "x": 3171.216107178748,
+      "x": 3221.400890468673,
       "y": 4342.857757441569
     },
     "inputs": [
