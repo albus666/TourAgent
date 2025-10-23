@@ -45,11 +45,12 @@ class CtripAPIHandler:
         data = result.get("data", [])
         
         if not data:
-            return {"poiId": None, "districtId": None, "sightUrl": None}
+            return {"poiId": None, "districtId": None, "sightUrl": None, "imageUrl": None}
 
         poi_id = None
         district_id = None
         sight_url: Optional[str] = None
+        image_url: Optional[str] = None
 
         # 查找景点poiId（sight类型）
         for item in data:
@@ -73,6 +74,13 @@ class CtripAPIHandler:
                             sight_url = f"https://you.ctrip.com/sight/{district_name}{district_id}/{product_id}.html"
                         except Exception:
                             sight_url = None
+                    
+                    # 提取图片URL并清理尺寸参数
+                    raw_image_url = item.get("imageUrl")
+                    if raw_image_url:
+                        # 去除图片URL中的尺寸参数（如 _C_320_320）
+                        import re as _re
+                        image_url = _re.sub(r'_[A-Z]_\d+_\d+\.jpg$', '.jpg', raw_image_url)
                     break
 
         # 查找城市districtId（district类型）
@@ -81,7 +89,7 @@ class CtripAPIHandler:
                 district_id = item.get("id")
                 break
 
-        return {"poiId": poi_id, "districtId": district_id, "sightUrl": sight_url}
+        return {"poiId": poi_id, "districtId": district_id, "sightUrl": sight_url, "imageUrl": image_url}
 
     def _get_poi_id(self, keyword: str) -> Optional[int]:
         """
@@ -123,12 +131,14 @@ class CtripAPIHandler:
             result = self._search_poi_and_district(keyword)
             sight_url = result.get("sightUrl")
             poi_id = result.get("poiId")
+            image_url = result.get("imageUrl")
             if not sight_url or not poi_id:
                 return {
                     "success": False,
                     "keyword": keyword,
                     "poiId": poi_id,
                     "sightUrl": sight_url,
+                    "imageUrl": image_url,
                     "message": "未找到景点详情页URL或POI ID"
                 }
             return {
@@ -136,6 +146,7 @@ class CtripAPIHandler:
                 "keyword": keyword,
                 "poiId": poi_id,
                 "sightUrl": sight_url,
+                "imageUrl": image_url,
                 "message": "成功获取景点详情页URL"
             }
         except Exception as e:
@@ -144,6 +155,7 @@ class CtripAPIHandler:
                 "keyword": keyword,
                 "poiId": None,
                 "sightUrl": None,
+                "imageUrl": None,
                 "message": f"获取详情页URL时发生异常: {e}"
             }
 
@@ -173,51 +185,7 @@ class CtripAPIHandler:
             
             # 提取轮播图片URL
             carousel_images = []
-            
-            # 使用CSS选择器路径匹配轮播图片
-            # 匹配 .swiper-wrapper 下的所有 .swiper-slide 元素
-            swiper_wrapper_pattern = r'<div class="swiper-wrapper"[^>]*>(.*?)</div>'
-            wrapper_match = _re.search(swiper_wrapper_pattern, resp.text, _re.DOTALL)
-            
-            if wrapper_match:
-                wrapper_content = wrapper_match.group(1)
-                # 在wrapper内匹配所有swiper-slide
-                slide_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
-                slide_matches = _re.findall(slide_pattern, wrapper_content)
-                carousel_images.extend(slide_matches)
-            
-            # 如果上面没找到，尝试更宽泛的匹配
-            if not carousel_images:
-                # 匹配所有包含 background-image 的 div
-                general_pattern = r'style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"'
-                all_matches = _re.findall(general_pattern, resp.text)
-                carousel_images.extend(all_matches)
-            
-            # 如果还是没找到，尝试使用更精确的路径匹配
-            if not carousel_images:
-                # 基于您提供的JS路径：baseInfoModule > swiper > swiperMain > swiper-wrapper
-                base_info_module_pattern = r'<div class="baseInfoModule"[^>]*>(.*?)</div>'
-                base_info_match = _re.search(base_info_module_pattern, resp.text, _re.DOTALL)
-                if base_info_match:
-                    base_info_content = base_info_match.group(1)
-                    # 在baseInfoModule内查找swiper
-                    swiper_pattern = r'<div class="swiper"[^>]*>(.*?)</div>'
-                    swiper_match = _re.search(swiper_pattern, base_info_content, _re.DOTALL)
-                    if swiper_match:
-                        swiper_content = swiper_match.group(1)
-                        # 在swiper内查找swiper-wrapper
-                        wrapper_pattern = r'<div class="swiper-wrapper"[^>]*>(.*?)</div>'
-                        wrapper_match = _re.search(wrapper_pattern, swiper_content, _re.DOTALL)
-                        if wrapper_match:
-                            wrapper_content = wrapper_match.group(1)
-                            # 在wrapper内匹配swiper-slide
-                            slide_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
-                            slide_matches = _re.findall(slide_pattern, wrapper_content)
-                            carousel_images.extend(slide_matches)
-            
-            # 去重并过滤，只保留携程图片URL
-            carousel_images = list(set([img for img in carousel_images if img.startswith('http') and 'ctrip.com' in img]))
-            
+
             # 提取景点标题
             title_match = _re.search(r'<h1[^>]*>([^<]+)</h1>', resp.text)
             title = title_match.group(1) if title_match else ""
