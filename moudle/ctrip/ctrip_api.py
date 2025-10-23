@@ -191,7 +191,7 @@ class CtripAPIHandler:
                 carousel_images.extend(all_matches)
             
             # 去重并过滤，只保留图片URL
-            carousel_images = list(set([img for img in carousel_images if img.startswith('http') and 'ctrip.com' in img]))
+            carousel_images = list(set([img for img in carousel_images if img.startswith('https') and 'ctrip.com' in img]))
             
             # 提取景点标题
             title_match = _re.search(r'<h1[^>]*>([^<]+)</h1>', resp.text)
