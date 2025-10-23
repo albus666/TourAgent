@@ -1,8 +1,7 @@
 import json
-import re
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, HTTPException, Query, Body, Request
+from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.responses import JSONResponse, Response
 import logging
 import os
@@ -27,102 +26,6 @@ ctrip_handler = CtripAPIHandler()
 
 # 初始化百度地图API处理器
 baidu_map_api = BaiduMapAPI()
-
-
-def fix_malformed_json(json_str: str) -> Dict:
-    """
-    修复格式错误的JSON字符串
-    
-    Args:
-        json_str: 格式错误的JSON字符串
-        
-    Returns:
-        修复后的字典对象
-    """
-    try:
-        # 首先尝试直接解析
-        return json.loads(json_str)
-    except json.JSONDecodeError:
-        logger.warning(f"检测到格式错误的JSON，尝试修复: {json_str[:100]}...")
-        
-        # 修复常见的JSON格式问题
-        fixed_json = json_str
-        
-        # 1. 修复双重转义的引号 \\\" -> \"
-        fixed_json = re.sub(r'\\\\"', '"', fixed_json)
-        
-        # 2. 修复换行符问题 \r\n -> 空格
-        fixed_json = re.sub(r'\r\n', ' ', fixed_json)
-        
-        # 3. 修复 \\n -> 空格
-        fixed_json = re.sub(r'\\n', ' ', fixed_json)
-        
-        # 4. 修复多余的转义字符
-        fixed_json = re.sub(r'\\{', '{', fixed_json)
-        fixed_json = re.sub(r'\\}', '}', fixed_json)
-        fixed_json = re.sub(r'\\,', ',', fixed_json)
-        fixed_json = re.sub(r'\\:', ':', fixed_json)
-        
-        # 5. 清理多余的空格
-        fixed_json = re.sub(r'\s+', ' ', fixed_json).strip()
-        
-        logger.info(f"修复后的JSON: {fixed_json}")
-        
-        try:
-            return json.loads(fixed_json)
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON修复失败: {e}")
-            # 如果修复失败，尝试手动解析关键字段
-            return parse_json_manually(json_str)
-
-
-def parse_json_manually(json_str: str) -> Dict:
-    """
-    手动解析JSON字符串，提取关键字段
-    
-    Args:
-        json_str: JSON字符串
-        
-    Returns:
-        解析后的字典
-    """
-    result = {}
-    
-    try:
-        # 提取location对象
-        location_match = re.search(r'"location":\s*\{([^}]+)\}', json_str)
-        if location_match:
-            location_str = location_match.group(1)
-            location = {}
-            
-            # 提取坐标值
-            lat1_match = re.search(r'"city1_lat":\s*([0-9.]+)', location_str)
-            lon1_match = re.search(r'"city1_lon":\s*([0-9.]+)', location_str)
-            lat2_match = re.search(r'"city2_lat":\s*([0-9.]+)', location_str)
-            lon2_match = re.search(r'"city2_lon":\s*([0-9.]+)', location_str)
-            
-            if lat1_match:
-                location['city1_lat'] = float(lat1_match.group(1))
-            if lon1_match:
-                location['city1_lon'] = float(lon1_match.group(1))
-            if lat2_match:
-                location['city2_lat'] = float(lat2_match.group(1))
-            if lon2_match:
-                location['city2_lon'] = float(lon2_match.group(1))
-            
-            result['location'] = location
-        
-        # 提取travel_model
-        travel_match = re.search(r'"travel_model":\s*"([^"]+)"', json_str)
-        if travel_match:
-            result['travel_model'] = travel_match.group(1)
-        
-        logger.info(f"手动解析结果: {result}")
-        return result
-        
-    except Exception as e:
-        logger.error(f"手动解析失败: {e}")
-        return {}
 
 
 # # @app.get("/weather")
@@ -521,10 +424,9 @@ async def geocode_cities(
 
 
 @app.post("/route/plan")
-async def plan_route_endpoint(request: Request):
+async def plan_route_endpoint(request_data: Dict = Body(...)):
     """
     路线规划接口 - 规划两点之间的路线并生成地图
-    支持处理格式错误的JSON数据
     
     输入格式（使用地理编码接口返回的location对象）:
         {
@@ -559,21 +461,6 @@ async def plan_route_endpoint(request: Request):
         }
     """
     try:
-        # 获取原始请求体
-        body = await request.body()
-        body_str = body.decode('utf-8')
-        
-        logger.info(f"原始请求体: {body_str}")
-        
-        # 尝试解析JSON，如果失败则尝试修复
-        try:
-            request_data = json.loads(body_str)
-        except json.JSONDecodeError:
-            logger.warning("JSON解析失败，尝试修复格式...")
-            request_data = fix_malformed_json(body_str)
-        
-        logger.info(f"解析后的数据: {request_data}")
-        
         # 获取location对象
         location = request_data.get("location")
         if not location:
@@ -701,13 +588,13 @@ async def aggregate_variables(request_data: Dict = Body(..., description="包含
 
 
 @app.post("/weather")
-async def get_weather_by_location(request: Request):
+async def get_weather_by_location(location: Dict = Body(..., description="包含城市经纬度的字典")):
     """
     天气查询接口 - 根据地理编码返回的location数据查询天气
-    支持处理格式错误的JSON数据
     
     Args:
-        request: 原始请求对象，包含可能格式错误的JSON数据
+        location: 地理编码接口返回的location对象，格式如：
+                 {"city1_lng": 116.40717, "city1_lat": 39.90469, "city2_lng": 121.4737, "city2_lat": 31.23037}
         
     Returns:
         JSONResponse: 包含各城市天气信息的响应
@@ -727,27 +614,10 @@ async def get_weather_by_location(request: Request):
         }
     """
     try:
-        # 获取原始请求体
-        body = await request.body()
-        body_str = body.decode('utf-8')
+        logger.info(f"开始查询天气，location数据: {location}")
         
-        logger.info(f"原始请求体: {body_str}")
-        
-        # 尝试解析JSON，如果失败则尝试修复
-        try:
-            request_data = json.loads(body_str)
-        except json.JSONDecodeError:
-            logger.warning("JSON解析失败，尝试修复格式...")
-            request_data = fix_malformed_json(body_str)
-        
-        logger.info(f"解析后的数据: {request_data}")
-        
-        # 获取location对象
-        location = request_data.get("location")
         if not location:
             raise HTTPException(status_code=400, detail="location参数不能为空")
-        
-        logger.info(f"开始查询天气，location数据: {location}")
         
         # 解析location中的城市数量
         city_count = 0
