@@ -173,13 +173,25 @@ class CtripAPIHandler:
             
             # 提取轮播图片URL
             carousel_images = []
-            # 匹配 swiper-wrapper 下的 swiper-slide swiperItem 中的 background-image
-            swiper_pattern = r'<div class="swiper-slide swiperItem[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
-            swiper_matches = _re.findall(swiper_pattern, resp.text)
-            carousel_images.extend(swiper_matches)
             
-            # 去重并过滤
-            carousel_images = list(set([img for img in carousel_images if img.startswith('http')]))
+            # 先尝试匹配 swiper-wrapper 区域
+            swiper_wrapper_match = _re.search(r'<div class="swiper-wrapper"[^>]*>(.*?)</div>', resp.text, _re.DOTALL)
+            if swiper_wrapper_match:
+                wrapper_content = swiper_wrapper_match.group(1)
+                # 在 swiper-wrapper 内匹配 swiper-slide
+                swiper_pattern = r'<div class="swiper-slide[^"]*"[^>]*style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"[^>]*>'
+                swiper_matches = _re.findall(swiper_pattern, wrapper_content)
+                carousel_images.extend(swiper_matches)
+            
+            # 如果上面没找到，尝试更宽泛的匹配
+            if not carousel_images:
+                # 匹配所有包含 background-image 的 div
+                general_pattern = r'style="[^"]*background-image:\s*url\(&quot;([^&"]+)&quot;\)[^"]*"'
+                all_matches = _re.findall(general_pattern, resp.text)
+                carousel_images.extend(all_matches)
+            
+            # 去重并过滤，只保留图片URL
+            carousel_images = list(set([img for img in carousel_images if img.startswith('http') and 'ctrip.com' in img]))
             
             # 提取景点标题
             title_match = _re.search(r'<h1[^>]*>([^<]+)</h1>', resp.text)
