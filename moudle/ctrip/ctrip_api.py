@@ -453,7 +453,6 @@ class CtripAPIHandler:
                 user_info = item.get("userInfo")
                 if user_info:
                     comment["userNick"] = user_info.get("userNick")
-                    comment["userImage"] = user_info.get("userImage")
                 
                 comment["score"] = item.get("score")
                 comment["content"] = item.get("content")
