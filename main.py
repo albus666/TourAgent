@@ -424,7 +424,7 @@ async def geocode_cities(
 
 
 @app.post("/route/plan")
-async def plan_route_endpoint(request_data: Dict = Body(...)):
+async def plan_route_endpoint(request_data: Dict = Body(..., description="路线规划请求数据")):
     """
     路线规划接口 - 规划两点之间的路线并生成地图
     
@@ -461,6 +461,8 @@ async def plan_route_endpoint(request_data: Dict = Body(...)):
         }
     """
     try:
+        logger.info(f"收到路线规划请求: {request_data}")
+        
         # 获取location对象
         location = request_data.get("location")
         if not location:
@@ -469,11 +471,15 @@ async def plan_route_endpoint(request_data: Dict = Body(...)):
                 detail="必须提供location对象"
             )
         
+        logger.info(f"原始location数据: {location}, 类型: {type(location)}")
+        
         # 如果location是字符串，尝试解析为JSON
         if isinstance(location, str):
             try:
                 location = json.loads(location)
+                logger.info(f"解析后的location: {location}")
             except json.JSONDecodeError as e:
+                logger.error(f"location JSON解析失败: {str(e)}")
                 raise HTTPException(
                     status_code=400,
                     detail=f"location JSON格式错误: {str(e)}"
@@ -629,11 +635,15 @@ async def get_weather_by_location(location: Dict = Body(..., description="包含
         if not location:
             raise HTTPException(status_code=400, detail="location参数不能为空")
         
+        logger.info(f"原始location数据: {location}, 类型: {type(location)}")
+        
         # 如果location是字符串，尝试解析为JSON
         if isinstance(location, str):
             try:
                 location = json.loads(location)
+                logger.info(f"解析后的location: {location}")
             except json.JSONDecodeError as e:
+                logger.error(f"location JSON解析失败: {str(e)}")
                 raise HTTPException(
                     status_code=400,
                     detail=f"location JSON格式错误: {str(e)}"
