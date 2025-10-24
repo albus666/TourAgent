@@ -453,7 +453,6 @@ class CtripAPIHandler:
                 user_info = item.get("userInfo")
                 if user_info:
                     comment["userNick"] = user_info.get("userNick")
-                    comment["userImage"] = user_info.get("userImage")
                 
                 comment["score"] = item.get("score")
                 comment["content"] = item.get("content")
@@ -464,8 +463,14 @@ class CtripAPIHandler:
                 images = item.get("images", [])
                 if images and len(images) > 0:
                     # 优先使用imageSrcUrl获取高清图片，如果没有则使用imageThumbUrl
-                    image_url = images[0].get("imageSrcUrl") or images[0].get("imageThumbUrl")
-                    comment["imageUrl"] = image_url
+                    raw_image_url = images[0].get("imageSrcUrl") or images[0].get("imageThumbUrl")
+                    if raw_image_url:
+                        # 去除图片URL中的尺寸参数（如 _C_320_320, _R_320_320_Q70 等）
+                        import re as _re
+                        image_url = _re.sub(r'_[A-Z]_\d+_\d+(_Q\d+)?\.jpg$', '.jpg', raw_image_url)
+                        comment["imageUrl"] = image_url
+                    else:
+                        comment["imageUrl"] = None
                 else:
                     comment["imageUrl"] = None
                 
